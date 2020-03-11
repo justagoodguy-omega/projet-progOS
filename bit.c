@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>   // for uint8_t and uint16_t types
 #include <inttypes.h> // for PRIx8, etc.
+#include "bit.h"
 
 // ======================================================================
 /**
@@ -139,3 +140,33 @@ void bit_set(uint8_t* value, int index){
 void bit_unset(uint8_t* value, int index){
     *value = *value & ~(1 << CLAMP07(index));
 }
+
+// ======================================================================
+void bit_rotate(uint8_t* value, rot_dir_t dir, int d){
+    uint8_t res = value;
+    int index = d % 8;
+    switch (dir) {
+	case LEFT:
+		res = res >> (8 - index);
+		*value = *value << index;
+		*value = *value | res;
+		break;
+	case RIGHT:
+		res = res >> index;
+		*value = *value << (8 - index);
+		*value = *value | res;
+		break;
+    }
+}
+
+// ======================================================================
+void bit_edit(uint8_t* value, int index, uint8_t v){
+
+    if (v == 0){
+        bit_unset(&value, index);
+    } else {
+        bit_set(&value, index); 
+    }
+}
+
+
