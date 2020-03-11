@@ -24,10 +24,7 @@ typedef uint8_t bit_t;
 /**
  * @brief Enumeration type of rotation directions: either LEFT or RIGHT
  */
-/* TODO WEEK 04:
- * Définir ici le type rot_dir_t
- * (et supprimer ces quatre lignes de commentaire).
- */
+enum rot_dir_t {LEFT, RIGHT};
 
 
 /**
