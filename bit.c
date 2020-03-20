@@ -4,34 +4,6 @@
 #include "bit.h"
 
 // ======================================================================
-/**
- * @brief a type to represent 1 single bit.
- */
-/* Nous vous fournission ici un type à n'utiliser QUE lorsque vous
- * voulez représenter UN SEUL bit ; p.ex. :
- *     bit_t un_bit_tout_seul = 1;
- */
-typedef uint8_t bit_t;
-
-
-// ======================================================================
-/**
- * @brief clamp a value to be a bit index between 0 and 7
- */
-/* Nous vous fournission ici une macro (les macros seront présentées dans
- *     le cours, bien plus tard dans le semestre) permettant de forcer
- * une valeur entre 0 et 7.
- * Par exemple :
- *     i = CLAMP07(j);
- * fera que la variable i contiendra :
- *     + la même valeur que celle de j si celle-ci est comprise entre 0 et 7 ;
- *     + 0 si la valeur de j est inférieure ou égale à 0 ;
- *     + 0 si la vlaeur de j est supérieure ou égale à 8.
- */
-#define CLAMP07(x) (((x) < 0) || ((x) > 7) ? 0 : (x))
-
-
-// ======================================================================
 #define size(T) (sizeof T / sizeof T[0])
 #define FMT8 "0x%02" PRIx8
 #define FMT16 "0x%04" PRIx16
@@ -143,7 +115,7 @@ void bit_unset(uint8_t* value, int index){
 
 // ======================================================================
 void bit_rotate(uint8_t* value, rot_dir_t dir, int d){
-    uint8_t res = value;
+    uint8_t res = *value;
     int index = d % 8;
     switch (dir) {
 	case LEFT:
@@ -163,9 +135,9 @@ void bit_rotate(uint8_t* value, rot_dir_t dir, int d){
 void bit_edit(uint8_t* value, int index, uint8_t v){
 
     if (v == 0){
-        bit_unset(&value, index);
+        bit_unset(value, index);
     } else {
-        bit_set(&value, index); 
+        bit_set(value, index); 
     }
 }
 

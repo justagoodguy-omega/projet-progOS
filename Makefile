@@ -23,7 +23,16 @@ CFLAGS += -std=c11 -Wall -pedantic -g
 # all those libs are required on Debian, feel free to adapt it to your box
 LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 
-all:: 
+all:: unit-test-bit
+
+unit-test-bit : unit-test-bit.o bit.o
+unit-test-alu : unit-test-alu.o alu.o bit.o
+
+unit-test-bit.o: unit-test-bit.c tests.h error.h bit.h
+unit-test-alu.o: unit-test-alu.c tests.h error.h alu.h bit.h
+bit.o: bit.c bit.h
+alu.o: alu.c bit.h alu.h error.h
+
 
 TARGETS := 
 CHECK_TARGETS := unit-test-bit unit-test-alu

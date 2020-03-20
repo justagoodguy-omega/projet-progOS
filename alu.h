@@ -33,7 +33,7 @@ typedef enum {
 } flag_bit_t;
 
 typedef struct {
-    uint16_t  result;
+    uint16_t value;
     flags_t flags;
     } alu_output_t;
 
