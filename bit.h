@@ -20,6 +20,10 @@ typedef uint8_t bit_t;
  * @brief clamp a value to be a bit index between 0 and 7
  */
 #define CLAMP07(x) (((x) < 0) || ((x) > 7) ? 0 : (x))
+/**
+ * msb of a uint8_t
+ */
+#define MSB_INDEX_8  7
 
 /**
  * @brief Enumeration type of rotation directions: either LEFT or RIGHT
@@ -143,6 +147,13 @@ void bit_unset(uint8_t* value, int index);
  * @param v allows to choose between set and unset
  */
 void bit_edit(uint8_t* value, int index, uint8_t v);
+
+/**
+* @brief returns the msb of value
+* @param value the value of which we want msb
+*/
+
+bit_t get_MSB_8(uint8_t value);
 
 
 #ifdef __cplusplus

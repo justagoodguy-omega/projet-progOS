@@ -10,7 +10,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-
 #include "memory.h"     // addr_t and data_t
 #include "component.h"
 
@@ -23,10 +22,7 @@ extern "C" {
 /**
  * @ brief Bus Type, a table of memory pointer pointing to the various component memories
  */
-/* TODO WEEK 05:
- * Définir ici le type bus_t
- * (et supprimer ces quatre lignes de commentaire).
- */
+typedef data_t* bus_t [BUS_SIZE];
 
 /**
  * @brief Plug a component into the bus

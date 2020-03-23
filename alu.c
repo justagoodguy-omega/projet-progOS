@@ -2,7 +2,6 @@
 #include "alu.h"
 #include "error.h"
 
-#define uint8MSBindex 7
 
 /**
  * @brief get flag value
@@ -11,10 +10,13 @@
  * @param flag flag value to get
  * @return flag value
  */
-bit_t get_flag(flags_t flags, flag_bit_t flag){
-    uint8_t res = flags & flag;
-    if (res == 0) return 0;
-    else return 1; 
+flag_bit_t get_flag(flags_t flags, flag_bit_t flag){
+    if(flag != FLAG_Z && flag != FLAG_N && flag != FLAG_H && flag != FLAG_C){
+        return 0;
+    } else {
+        flag_bit_t res = flags & flag;
+        return res;
+    }
 }
 
 /**
@@ -81,13 +83,12 @@ int alu_sub8(alu_output_t* result, uint8_t x, uint8_t y, bit_t b0){
     if (res == 0){
         set_flag(&(result -> flags), FLAG_Z);
     }
-    if (msb8(res) != 0){
-        set_flag(&(result -> flags), FLAG_N);
-    }
+    set_flag(&(result -> flags), FLAG_N);
+
     if (msb4(v1) != 0){
         set_flag(&(result -> flags), FLAG_H);
     }
-    if (msb4(v2) != 0){
+    if (x < y + b0){
         set_flag(&(result -> flags), FLAG_C);
     }
 
@@ -178,24 +179,30 @@ int alu_shift(alu_output_t* result, uint8_t x, rot_dir_t dir){
 
     switch (dir) {
 	case LEFT:
-		if(bit_get(x, uint8MSBindex) == 1){
+		if(bit_get(x, MSB_INDEX_8) == 1){
             set_flag(&(result -> flags), FLAG_C);
         }
-        if (x >> 1 == 0) {
+        x = x << 1;
+
+        if (x == 0) {
             set_flag(&(result -> flags), FLAG_Z);
         }
-        result -> value = x << 1;
+        result -> value = x;
         break;
 
 	case RIGHT:
 		if (bit_get(x, 0) == 1){
             set_flag(&(result -> flags), FLAG_C);
         }
-         if (x >> 1 == 0) {
+        x = x >> 1;
+        if (x == 0) {
             set_flag(&(result -> flags), FLAG_Z);
         }
-        result -> value = x >> 1;
+        result -> value = x;
         break;
+
+    default: 
+        return ERR_BAD_PARAMETER;
     }
     return ERR_NONE;
 }
@@ -218,8 +225,8 @@ int alu_shiftR_A(alu_output_t* result, uint8_t x){
     if (bit_get(x, 0) == 1){
         set_flag(&(result -> flags), FLAG_C);
     }
-    if (bit_get(x, uint8MSBindex) == 1){
-        bit_set(&shift_result, uint8MSBindex);
+    if (get_MSB_8(x) == 1){
+        bit_set(&shift_result, MSB_INDEX_8);
     }
     if( shift_result == 0){
         set_flag(&(result -> flags), FLAG_Z);
@@ -243,7 +250,7 @@ int alu_rotate(alu_output_t* result, uint8_t x, rot_dir_t dir){
     (result -> flags) = 0;
     switch (dir) {
 	case LEFT:
-		if (bit_get(x, uint8MSBindex) == 1) {
+		if (bit_get(x, MSB_INDEX_8) == 1) {
             set_flag(&(result -> flags), FLAG_C);
         }
         break;
@@ -253,8 +260,12 @@ int alu_rotate(alu_output_t* result, uint8_t x, rot_dir_t dir){
             set_flag(&(result -> flags), FLAG_C);
         }
         break;
+
+    default: 
+        return ERR_BAD_PARAMETER;
     }
-    bit_rotate(&(result -> value), dir, 1);
+    bit_rotate(&x, dir, 1);
+    result -> value = x;
     if (x == 0 ){
         set_flag(&(result -> flags), FLAG_Z);
     }
@@ -279,9 +290,11 @@ int alu_carry_rotate(alu_output_t* result, uint8_t x, rot_dir_t dir, flags_t fla
     bit_t lsb_x = 0;
     switch (dir) {
 	case LEFT: 
-		msb_x = bit_get(x, uint8MSBindex);
+		msb_x = get_MSB_8(x);
         x = x << 1;
-        x = x + flags;
+        if(get_C(flags) != 0){
+            x = x + 1;
+        }
         if (msb_x == 1){
             set_flag(&(result -> flags), FLAG_C);
         }
@@ -290,11 +303,16 @@ int alu_carry_rotate(alu_output_t* result, uint8_t x, rot_dir_t dir, flags_t fla
 	case RIGHT:
 		lsb_x = bit_get(x, 0);
         x = x >> 1;
-        x = x + (flags << uint8MSBindex);
+        if(get_C(flags) != 0){
+            x = x + (1 << MSB_INDEX_8);
+        }
         if (lsb_x == 1){
             set_flag(&(result -> flags), FLAG_C);
         }
         break;
+
+     default: 
+        return ERR_BAD_PARAMETER;
     }
     if(x == 0){
         set_flag(&(result -> flags), FLAG_Z);

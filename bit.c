@@ -11,6 +11,7 @@
 #define show2(M, V) printf("bit_" #M "(" FMT8 ", %d) = " FMT8 "\n", V, k, value2)
 
 
+
 // ======================================================================
 /**
  * @brief returns the 4 LSB of a uint8_t
@@ -139,6 +140,11 @@ void bit_edit(uint8_t* value, int index, uint8_t v){
     } else {
         bit_set(value, index); 
     }
+}
+
+//=====================================================================
+bit_t get_MSB_8(uint8_t value){
+    return bit_get(value, MSB_INDEX_8);
 }
 
 
