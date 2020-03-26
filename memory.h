@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,7 +29,7 @@ typedef uint8_t data_t;
  *        Holds a pointer to the memory, its size and if it is writable
  */
 typedef struct {
-    addr_t memory [MAX_MEM_SIZE];
+    data_t memory [MAX_MEM_SIZE];
     size_t size;
 } memory_t;
 

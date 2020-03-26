@@ -23,15 +23,26 @@ CFLAGS += -std=c11 -Wall -pedantic -g
 # all those libs are required on Debian, feel free to adapt it to your box
 LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 
-all:: unit-test-bit unit-test-alu
+all:: unit-test-bit unit-test-alu unit-test-bus
 
 unit-test-bit : unit-test-bit.o bit.o
 unit-test-alu : unit-test-alu.o alu.o bit.o
+unit-test-bus : unit-test-bus.o bus.o alu.o bit.o component.o
 
-unit-test-bit.o: unit-test-bit.c tests.h error.h bit.h
-unit-test-alu.o: unit-test-alu.c tests.h error.h alu.h bit.h
-bit.o: bit.c bit.h
 alu.o: alu.c bit.h alu.h error.h
+bit.o: bit.c bit.h
+bus.o: bus.c bus.h memory.h component.h error.h bit.h
+component.o: component.c component.h memory.h error.h
+error.o: error.c
+libsid_demo.o: libsid_demo.c sidlib.h
+sidlib.o: sidlib.c sidlib.h
+unit-test-alu.o: unit-test-alu.c tests.h error.h alu.h bit.h
+unit-test-bit.o: unit-test-bit.c tests.h error.h bit.h
+#unit-test-bus.o: unit-test-bus.c tests.h error.h bus.h memory.h component.h util.h
+unit-test-component.o: unit-test-component.c tests.h error.h bus.h memory.h component.h
+unit-test-memory.o: unit-test-memory.c tests.h error.h bus.h memory.h component.h
+util.o: util.c
+
 
 
 TARGETS := 

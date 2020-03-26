@@ -8,13 +8,16 @@ int component_create(component_t* c, size_t mem_size){
         return ERR_BAD_PARAMETER;
     }
     memory_t component_memory;
-    component_memory.size = mem_size
-    c = &component_t (component_memory, 0, 0);
+    component_memory.size = mem_size;
+    component_t c_struct = {component_memory, 0, 0};
+    c = &c_struct;
 
     return ERR_NONE;
+}
 
 void component_free(component_t* c){
-    M_REQUIRE_NON_NULL(c);
-    c -> start = 0;
-    c -> end = 0;
+    if(c != NULL){
+        c -> start = 0;
+        c -> end = 0;
+    }
 }
