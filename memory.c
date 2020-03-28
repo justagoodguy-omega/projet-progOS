@@ -37,8 +37,8 @@ void mem_free(memory_t* mem){
     if (mem != NULL){
         if (mem -> memory != NULL){
             free(mem -> memory);
+            free(mem);
         }
-        free(mem);
         mem -> size = 0;
         mem = NULL;
     }
