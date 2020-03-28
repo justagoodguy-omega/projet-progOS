@@ -1,5 +1,3 @@
-#pragma once
-
 /**
  * @file gameboy.c
  * @brief Gameboy Emulator
@@ -22,20 +20,31 @@ int gameboy_create(gameboy_t* gameboy, const char* filename){
     gameboy = malloc(sizeof(gameboy_t));
     M_REQUIRE_NON_NULL(gameboy);
 
-    memory_t* mem = calloc(8192, sizeof(uint8_t));
-    M_REQUIRE_NON_NULL(mem);
+    // WORK_RAM
+    char* wr = "WORK_RAM";
+    memory_t* work_mem = calloc(MEM_SIZE(wr), sizeof(uint8_t));
+    M_REQUIRE_NON_NULL(work_mem);
 
     component_t* workRAM = malloc(sizeof(component_t);
     M_REQUIRE_NON_NULL(workRAM);
 
-    workRAM -> mem = &mem;
+    workRAM -> mem = &work_mem;
     workRAM -> start = WORK_RAM_START;
     workRAM -> end = WORK_RAM_END;
-    bus_t gb_bus;
-    M_REQUIRE_NO_ERR(bus_plug(gb_bus, &workRAM, workRAM -> start, workRAM -> end));
+    
+    // ECHO_RAM
+    component_t* echoRAM = malloc(sizeof(component_t));
+    M_REQUIRE_NON_NULL(echoRAM);
+    M_REQUIRE_NO_ERR(component_shared(echoRAM, workRAM));
+    echoRAM -> start = ECHO_RAM_START;
+    echoRAM -> end = ECHO_RAM_END;
 
-    gameboy -> bus = gb_bus; 
-    gameboy -> components[0] = &workRAM;
+    bus_t gb_bus;
+    M_REQUIRE_NO_ERR(bus_plug(gb_bus, workRAM, workRAM -> start, workRAM -> end));
+    M_REQUIRE_NO_ERR(bus_plug(gb_bus, echoRAM, echoRAM -> start, echoRAM -> end));
+    gameboy -> bus = gb_bus;
+    gameboy -> components[0] = workRAM;
+    gameboy -> components[1] = echoRAM;
 
     return ERR_NONE;
 }

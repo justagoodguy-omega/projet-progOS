@@ -1,3 +1,11 @@
+/**
+ * @file memory.c
+ * @brief Memory for Gamemu
+ *
+ * @author P. Oliver & L. Rovati, EPFL
+ * @date 2020
+ */
+#include <stdlib.h>
 #include "component.h"
 #include "memory.h"
 #include "error.h"
@@ -10,14 +18,25 @@
  * @return error code
  */
 int component_create(component_t* c, size_t mem_size){
-    if(mem_size > MAX_MEM_SIZE){
+    M_REQUIRE_NON_NULL(c);
+    if (mem_size < 0){
         return ERR_BAD_PARAMETER;
     }
-    memory_t component_memory;
-    component_memory.size = mem_size
-    c = &component_t (component_memory, 0, 0);
 
+    if (mem_size == 0){
+        c -> mem = NULL;
+        c -> start = 0;
+        c -> end = 0;
+        return ERR_NONE;
+    }
+
+    c -> mem = calloc(mem_size, sizeof(data_t));
+    M_REQUIRE_NON_NULL(c-> mem);
+
+    c -> start = 0;
+    c -> end = mem_size;
     return ERR_NONE;
+}
 
 /**
  * @brief Shares memory between two components
@@ -27,8 +46,14 @@ int component_create(component_t* c, size_t mem_size){
  * @return error code
  */
 int component_shared(component_t* c, component_t* c_old){
+    M_REQUIRE_NON_NULL(c);
+    M_REQUIRE_NON_NULL(c_old);
 
-    return ERR_NOT_IMPLEMENTED;
+    c -> start = 0;
+    c -> end = 0;
+    c -> mem = c_old -> mem;
+
+    return ERR_NONE;
 }
 
 /**
@@ -37,7 +62,10 @@ int component_shared(component_t* c, component_t* c_old){
  * @param c component pointer to destroy
  */
 void component_free(component_t* c){
-    M_REQUIRE_NON_NULL(c);
+    if (c -> mem != NULL){
+        mem_free(c -> mem);
+    }
     c -> start = 0;
     c -> end = 0;
+    c = NULL;
 }
