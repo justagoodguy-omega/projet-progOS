@@ -23,6 +23,8 @@ int component_create(component_t* c, size_t mem_size){
         return ERR_BAD_PARAMETER;
     }
 
+    M_EXIT_IF_NULL(c = (component_t*)malloc(sizeof(component_t)), sizeof(component_t));
+
     if (mem_size == 0){
         c -> mem = NULL;
         c -> start = 0;
@@ -30,8 +32,7 @@ int component_create(component_t* c, size_t mem_size){
         return ERR_NONE;
     }
 
-    c -> mem = calloc(mem_size, sizeof(data_t));
-    M_REQUIRE_NON_NULL(c-> mem);
+    M_EXIT_IF_ERR(mem_create(c -> mem, mem_size));
 
     c -> start = 0;
     c -> end = mem_size;
