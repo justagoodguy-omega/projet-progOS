@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include "memory.h"     // addr_t and data_t
 #include "component.h"
 

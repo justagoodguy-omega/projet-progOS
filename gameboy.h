@@ -20,6 +20,12 @@ extern "C" {
 
 #define GB_NB_COMPONENTS 5
 
+typedef struct {
+    bus_t bus;
+    component_t* components[GB_NB_COMPONENTS];
+
+} gameboy_t;
+
 /**
  * @brief Game Boy data structure.
  *        Regroups everything needed to simulate the Game Boy.

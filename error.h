@@ -98,7 +98,6 @@ typedef enum {
  * @brief M_EXIT_ERR macro is a kind of M_EXIT, indicating (in debug mode)
  *        the error message corresponding to the error code, followed
  *        by the message passed in argument.
-
  *        Example usage:
  *            M_EXIT_ERR(ERR_BAD_PARAMETER, "unable to generate from %lu", i);
  */
