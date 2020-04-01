@@ -17,7 +17,6 @@
  */
 int gameboy_create(gameboy_t* gameboy, const char* filename){
 
-    gameboy = malloc(sizeof(gameboy_t));
     M_REQUIRE_NON_NULL(gameboy);
 
     // WORK_RAM
@@ -39,6 +38,7 @@ int gameboy_create(gameboy_t* gameboy, const char* filename){
     echoRAM -> start = ECHO_RAM_START;
     echoRAM -> end = ECHO_RAM_END;
 
+    // BUS
     bus_t gb_bus;
     M_REQUIRE_NO_ERR(bus_plug(gb_bus, workRAM, workRAM -> start, workRAM -> end));
     M_REQUIRE_NO_ERR(bus_plug(gb_bus, echoRAM, echoRAM -> start, echoRAM -> end));
