@@ -21,7 +21,6 @@ int mem_create(memory_t* mem, size_t size){
         return ERR_BAD_PARAMETER;
     }
 
-    //M_EXIT_IF_NULL(mem = (memory_t*)malloc(sizeof(memory_t)), sizeof(memory_t));
     M_EXIT_IF_NULL(mem -> memory = calloc(size, sizeof(data_t)), size * sizeof(data_t));
 
     mem -> size = size;
@@ -37,7 +36,7 @@ void mem_free(memory_t* mem){
     if (mem != NULL){
         if (mem -> memory != NULL){
             free(mem -> memory);
-            //free(mem);
+            mem -> memory = NULL;
         }
         mem -> size = 0;
         mem = NULL;

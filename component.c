@@ -23,19 +23,18 @@ int component_create(component_t* c, size_t mem_size){
         return ERR_BAD_PARAMETER;
     }
 
-    M_EXIT_IF_NULL(c = (component_t*)malloc(sizeof(component_t)), sizeof(component_t));
-
     if (mem_size == 0){
         c -> mem = NULL;
         c -> start = 0;
         c -> end = 0;
         return ERR_NONE;
+    } else {
+        M_EXIT_IF_NULL(c -> mem = (memory_t*)malloc(sizeof(memory_t)), sizeof(memory_t));
+        M_REQUIRE_NO_ERR(mem_create(c -> mem, mem_size));
     }
 
-    M_EXIT_IF_ERR(mem_create(c -> mem, mem_size));
-
     c -> start = 0;
-    c -> end = mem_size;
+    c -> end = 0;
     return ERR_NONE;
 }
 
@@ -65,6 +64,7 @@ int component_shared(component_t* c, component_t* c_old){
 void component_free(component_t* c){
     if (c -> mem != NULL){
         mem_free(c -> mem);
+        c -> mem = NULL;
     }
     c -> start = 0;
     c -> end = 0;
