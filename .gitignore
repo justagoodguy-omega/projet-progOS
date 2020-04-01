@@ -1,3 +1,9 @@
 *.o
 unit-test-alu
 unit-test-bit
+unit-tset-bus
+unit-test-component
+unit-test-memory
+unit-test-cpu
+unit-test-cpu-dispatch-week08
+unit-test-cpu-dispatch-week09
