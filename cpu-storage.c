@@ -16,40 +16,51 @@
 // ==== see cpu-storage.h ========================================
 data_t cpu_read_at_idx(const cpu_t* cpu, addr_t addr)
 {
-    return 0;
+    data_t readData = 0;
+    M_REQUIRE_NO_ERR(bus_read(cpu -> bus, addr, &readData));
+    return readData; 
 }
 
 // ==== see cpu-storage.h ========================================
 addr_t cpu_read16_at_idx(const cpu_t* cpu, addr_t addr)
 {
-    return 0;
+    if (addr == 0xFFFF){
+        return 0xFF;
+    }
+    addr_t readData16 = 0;
+    M_REQUIRE_NO_ERR(bus_read16, (cpu -> bus, addr, &readData16));
+    return readData16;
 }
 
 // ==== see cpu-storage.h ========================================
 int cpu_write_at_idx(cpu_t* cpu, addr_t addr, data_t data)
 {
-
+    M_REQUIRE_NO_ERR(bus_write(cpu -> bus, addr, data));
     return ERR_NONE;
 }
 
 // ==== see cpu-storage.h ========================================
 int cpu_write16_at_idx(cpu_t* cpu, addr_t addr, addr_t data16)
 {
-
+    M_REQUIRE_NO_ERR(bus_write16(cpu -> bus, addr, data16));
     return ERR_NONE;
 }
 
 // ==== see cpu-storage.h ========================================
 int cpu_SP_push(cpu_t* cpu, addr_t data16)
 {
-
+    addr_t newAddr = cpu -> SP - 2;
+    cpu -> SP = newAddr;
+    M_REQUIRE_NO_ERR(cpu_write16_at_idx(cpu, newAddr, data16));
     return ERR_NONE;
 }
 
 // ==== see cpu-storage.h ========================================
 addr_t cpu_SP_pop(cpu_t* cpu)
 {
-    return 0;
+    addr_t readData = cpu_read16_at_idx(cpu, cpu -> SP);
+    cpu -> SP = cpu -> SP + 2;
+    return readData;
 }
 
 // ==== see cpu-storage.h ========================================
