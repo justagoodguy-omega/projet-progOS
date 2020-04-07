@@ -12,6 +12,7 @@
 #include "cpu-registers.h"
 #include "cpu-storage.h"
 #include "util.h"
+#include "bus.h"
 
 #include <inttypes.h> // PRIX8
 #include <stdio.h> // fprintf
@@ -19,21 +20,74 @@
 // ======================================================================
 int cpu_init(cpu_t* cpu)
 {
+    M_REQUIRE_NON_NULL(cpu);
+    cpu_BC_set(cpu, 0);
+    cpu_DE_set(cpu, 0);
+    cpu_HL_set(cpu, 0);
+    cpu_AF_set(cpu, 0);
 
+    cpu -> alu.flags = 0;
+    cpu -> alu.value = 0;
+    cpu -> bus = NULL;
+    cpu -> idle_time = 0;
+   
     return ERR_NONE;
 }
 
 // ======================================================================
 int cpu_plug(cpu_t* cpu, bus_t* bus)
 {
-
+    M_REQUIRE_NON_NULL(cpu);
+    cpu -> bus = bus;
     return ERR_NONE;
 }
 
 // ======================================================================
 void cpu_free(cpu_t* cpu)
 {
+    cpu -> bus = NULL;
 }
+
+// ======================================================================
+data_t cpu_read_at_idx(const cpu_t* cpu, addr_t addr){
+    M_REQUIRE_NON_NULL(cpu);
+    M_REQUIRE_NON_NULL(cpu -> bus);
+    data_t data;
+    if(bus_read(*(cpu -> bus), addr, &data) == 0){
+        return data;
+    }
+    else{
+        return 0;
+    }
+}
+
+// =======================================================================
+addr_t cpu_read16_at_idx(const cpu_t* cpu, addr_t addr){
+    M_REQUIRE_NON_NULL(cpu);
+    M_REQUIRE_NON_NULL(cpu -> bus);
+    addr_t data;
+    if(bus_read16(*(cpu -> bus), addr, &data) == 0){
+        return data;
+    }
+    else{
+        return 0;
+    }
+}
+
+/// =======================================================================
+int cpu_write_at_idx(cpu_t* cpu, addr_t addr, data_t data){
+    M_REQUIRE_NON_NULL(cpu);
+    M_REQUIRE_NON_NULL(cpu -> bus);
+    return bus_write(*(cpu -> bus), addr, data);
+}
+
+// =======================================================================
+int cpu_write16_at_idx(cpu_t* cpu, addr_t addr, addr_t data16){
+    M_REQUIRE_NON_NULL(cpu);
+    M_REQUIRE_NON_NULL(cpu -> bus);
+    return bus_write16(*(cpu -> bus), addr, data16);
+}
+
 
 //=========================================================================
 /**
@@ -205,7 +259,9 @@ static int cpu_do_cycle(cpu_t* cpu)
 int cpu_cycle(cpu_t* cpu)
 {
     M_REQUIRE_NON_NULL(cpu);
-    M_REQUIRE_NON_NULL(cpu->bus);
-
-        return ERR_NONE;
+    uint8_t cycles = cpu -> idle_time;
+    if(cycles != 0){
+        cpu -> idle_time = cycles - 1;
+    }
+    return ERR_NONE;
 }
