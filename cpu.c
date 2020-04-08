@@ -48,47 +48,6 @@ void cpu_free(cpu_t* cpu)
     cpu -> bus = NULL;
 }
 
-// ======================================================================
-data_t cpu_read_at_idx(const cpu_t* cpu, addr_t addr){
-    M_REQUIRE_NON_NULL(cpu);
-    M_REQUIRE_NON_NULL(cpu -> bus);
-    data_t data;
-    if(bus_read(*(cpu -> bus), addr, &data) == 0){
-        return data;
-    }
-    else{
-        return 0;
-    }
-}
-
-// =======================================================================
-addr_t cpu_read16_at_idx(const cpu_t* cpu, addr_t addr){
-    M_REQUIRE_NON_NULL(cpu);
-    M_REQUIRE_NON_NULL(cpu -> bus);
-    addr_t data;
-    if(bus_read16(*(cpu -> bus), addr, &data) == 0){
-        return data;
-    }
-    else{
-        return 0;
-    }
-}
-
-/// =======================================================================
-int cpu_write_at_idx(cpu_t* cpu, addr_t addr, data_t data){
-    M_REQUIRE_NON_NULL(cpu);
-    M_REQUIRE_NON_NULL(cpu -> bus);
-    return bus_write(*(cpu -> bus), addr, data);
-}
-
-// =======================================================================
-int cpu_write16_at_idx(cpu_t* cpu, addr_t addr, addr_t data16){
-    M_REQUIRE_NON_NULL(cpu);
-    M_REQUIRE_NON_NULL(cpu -> bus);
-    return bus_write16(*(cpu -> bus), addr, data16);
-}
-
-
 //=========================================================================
 /**
  * @brief Executes an instruction
