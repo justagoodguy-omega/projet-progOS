@@ -60,6 +60,7 @@ void component_free(component_t* c)
 {
     if (c -> mem != NULL){
         mem_free(c -> mem);
+        free(c -> mem);
         c -> mem = NULL;
     }
     c -> start = 0;
