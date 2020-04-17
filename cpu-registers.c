@@ -34,7 +34,7 @@ void cpu_reg_pair_set(cpu_t* cpu, reg_pair_kind reg, uint16_t value){
         case REG_BC_CODE : cpu -> BC = value; break;
         case REG_DE_CODE : cpu -> DE = value; break;
         case REG_HL_CODE : cpu -> HL = value; break;
-        case REG_AF_CODE : cpu -> AF = value & 0x1110; break;
+        case REG_AF_CODE : cpu -> AF = value & 0xFFF0; break;
         default : ;
     }
 }

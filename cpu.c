@@ -18,6 +18,13 @@
 #include <stdio.h> // fprintf
 
 // ======================================================================
+/**
+ * @brief Starts the cpu by initializing all registers at zero
+ *
+ * @param cpu cpu to start
+ *
+ * @return error code
+ */
 int cpu_init(cpu_t* cpu)
 {
     M_REQUIRE_NON_NULL(cpu);
@@ -25,6 +32,8 @@ int cpu_init(cpu_t* cpu)
     cpu_DE_set(cpu, 0);
     cpu_HL_set(cpu, 0);
     cpu_AF_set(cpu, 0);
+    cpu -> PC = 0;
+    cpu -> SP = 0;
 
     cpu -> alu.flags = 0;
     cpu -> alu.value = 0;
@@ -35,6 +44,14 @@ int cpu_init(cpu_t* cpu)
 }
 
 // ======================================================================
+/**
+ * @brief Plugs a bus into the cpu
+ *
+ * @param cpu cpu to plug into
+ * @param bus bus to plug
+ *
+ * @return error code
+ */
 int cpu_plug(cpu_t* cpu, bus_t* bus)
 {
     M_REQUIRE_NON_NULL(cpu);
@@ -43,6 +60,11 @@ int cpu_plug(cpu_t* cpu, bus_t* bus)
 }
 
 // ======================================================================
+/**
+ * @brief Frees a cpu
+ *
+ * @param cpu cpu to free
+ */
 void cpu_free(cpu_t* cpu)
 {
     cpu -> bus = NULL;
