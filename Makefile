@@ -23,11 +23,11 @@ CFLAGS += -std=c11 -Wall -pedantic -g
 # all those libs are required on Debian, feel free to adapt it to your box
 LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 
-all:: unit-test-bit unit-test-alu unit-test-memory unit-test-component unit-test-cpu
+all:: unit-test-bit unit-test-alu unit-test-bus unit-test-memory unit-test-component unit-test-cpu
 
 unit-test-bit : unit-test-bit.o bit.o
 unit-test-alu : unit-test-alu.o alu.o bit.o
-unit-test-bus :	unit-test-bus.o bus.o
+unit-test-bus :	unit-test-bus.o bus.o component.o bit.o memory.o
 unit-test-memory : unit-test-memory.o memory.o bus.o component.o bit.o
 unit-test-component : unit-test-component.o component.o bus.o memory.o bit.o
 unit-test-cpu: unit-test-cpu.o component.o bus.o memory.o bit.o cpu.o cpu-registers.o cpu-storage.o
@@ -52,8 +52,12 @@ libsid_demo.o: libsid_demo.c sidlib.h
 memory.o: memory.c memory.h error.h
 opcode.o: opcode.c opcode.h bit.h
 sidlib.o: sidlib.c sidlib.h
+util.o: util.c
+
+
 unit-test-alu.o: unit-test-alu.c tests.h error.h alu.h bit.h
 unit-test-bit.o: unit-test-bit.c tests.h error.h bit.h
+unit-test-bus.o: unit-test-bus.c tests.h bus.h component.h error.h util.h
 unit-test-component.o: unit-test-component.c tests.h error.h bus.h \
  memory.h component.h
 unit-test-cpu.o: unit-test-cpu.c tests.h error.h alu.h bit.h opcode.h \
@@ -68,13 +72,12 @@ unit-test-cpu-dispatch-week09.o: unit-test-cpu-dispatch-week09.c tests.h \
  unit-test-cpu-dispatch.h cpu.c cpu-alu.h cpu-registers.h cpu-storage.h
 unit-test-memory.o: unit-test-memory.c tests.h error.h bus.h memory.h \
  component.h
-util.o: util.c
 
 
 
 
 TARGETS := 
-CHECK_TARGETS := unit-test-bit unit-test-alu unit-test-memory unit-test-component
+CHECK_TARGETS := unit-test-bus unit-test-memory unit-test-component unit-test-cpu
 OBJS = 
 OBJS_NO_STATIC_TESTS =
 OBJS_STATIC_TESTS = 
