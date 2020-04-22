@@ -16,11 +16,6 @@
 // ==== see cpu-storage.h ========================================
 data_t cpu_read_at_idx(const cpu_t* cpu, addr_t addr)
 {
-<<<<<<< HEAD
-    data_t readData = 0;
-    M_REQUIRE_NO_ERR(bus_read(cpu -> bus, addr, &readData));
-    return readData; 
-=======
     M_REQUIRE_NON_NULL(cpu);
     M_REQUIRE_NON_NULL(cpu -> bus);
     data_t readData = 0;
@@ -30,57 +25,38 @@ data_t cpu_read_at_idx(const cpu_t* cpu, addr_t addr)
         return 0;
     }
     
->>>>>>> master
 }
 
 // ==== see cpu-storage.h ========================================
 addr_t cpu_read16_at_idx(const cpu_t* cpu, addr_t addr)
 {
-<<<<<<< HEAD
-=======
     M_REQUIRE_NON_NULL(cpu);
     M_REQUIRE_NON_NULL(cpu -> bus);
->>>>>>> master
     if (addr == 0xFFFF){
         return 0xFF;
     }
     addr_t readData16 = 0;
-<<<<<<< HEAD
-    M_REQUIRE_NO_ERR(bus_read16, (cpu -> bus, addr, &readData16));
-    return readData16;
-=======
     if(bus_read16(*(cpu -> bus), addr, &readData16) == 0){
         return readData16;
     } else {
         return 0;
     }
->>>>>>> master
 }
 
 // ==== see cpu-storage.h ========================================
 int cpu_write_at_idx(cpu_t* cpu, addr_t addr, data_t data)
 {
-<<<<<<< HEAD
-    M_REQUIRE_NO_ERR(bus_write(cpu -> bus, addr, data));
-    return ERR_NONE;
-=======
     M_REQUIRE_NON_NULL(cpu);
     M_REQUIRE_NON_NULL(cpu -> bus);
     return bus_write(*(cpu -> bus), addr, data);
->>>>>>> master
 }
 
 // ==== see cpu-storage.h ========================================
 int cpu_write16_at_idx(cpu_t* cpu, addr_t addr, addr_t data16)
 {
-<<<<<<< HEAD
-    M_REQUIRE_NO_ERR(bus_write16(cpu -> bus, addr, data16));
-    return ERR_NONE;
-=======
     M_REQUIRE_NON_NULL(cpu);
     M_REQUIRE_NON_NULL(cpu -> bus);
     return bus_write16(*(cpu -> bus), addr, data16);
->>>>>>> master
 }
 
 // ==== see cpu-storage.h ========================================
@@ -107,48 +83,71 @@ int cpu_dispatch_storage(const instruction_t* lu, cpu_t* cpu)
 
     switch (lu->family) {
     case LD_A_BCR:
+        cpu_reg_set(cpu, REG_A_CODE, cpu_BC_get(cpu));
         break;
 
     case LD_A_CR:
+        cpu_reg_set(cpu, REG_A_CODE,
+                cpu_read_at_idx(cpu, 0xFF00 + cpu_reg_get(cpu, REG_C_CODE)));
         break;
 
     case LD_A_DER:
+        cpu_reg_set(cpu, REG_A_CODE, cpu_DE_get(cpu));
         break;
 
     case LD_A_HLRU:
+        cpu_reg_set(cpu, REG_A_CODE, cpu_HL_get(cpu));
+        cpu_HL_set(cpu, cpu_HL_get(cpu) + extract_HL_increment(lu -> opcode));
         break;
 
     case LD_A_N16R:
+        cpu_reg_set(cpu, REG_A_CODE,
+                cpu_read_at_idx(cpu, cpu_read_addr_after_opcode(cpu)));
         break;
 
     case LD_A_N8R:
+        cpu_reg_set(cpu, REG_A_CODE,
+                cpu_read_at_idx(cpu, 0xFF00 + cpu_read_data_after_opcode(cpu)));
         break;
 
     case LD_BCR_A:
+        cpu_write_at_idx(cpu, cpu_HL_get(cpu), cpu_reg_get(cpu, REG_A_CODE));
         break;
 
     case LD_CR_A:
+        cpu_write_at_idx(cpu, 0xFF00 + cpu_reg_get(cpu, REG_C_CODE),
+                cpu_reg_get(cpu, REG_A_CODE));
         break;
 
     case LD_DER_A:
+        cpu_write_at_idx(cpu, cpu_DE_get(cpu), cpu_reg_get(cpu, REG_A_CODE));
         break;
 
     case LD_HLRU_A:
+        cpu_write_at_HL(cpu, cpu_reg_get(cpu, REG_A_CODE));
+        cpu_HL_set(cpu, cpu_HL_get(cpu) + extract_HL_increment(lu -> opcode));
         break;
 
     case LD_HLR_N8:
+        cpu_write_at_HL(cpu, cpu_read_data_after_opcode(cpu));
         break;
 
     case LD_HLR_R8:
+        cpu_write_at_HL(cpu, extract_reg(lu -> opcode, 0));
         break;
 
     case LD_N16R_A:
+        cpu_write16_at_idx(cpu, cpu_read_addr_after_opcode(cpu),
+                cpu_reg_get(cpu, REG_A_CODE));
         break;
 
     case LD_N16R_SP:
+        cpu_write16_at_idx(cpu, cpu_read_addr_after_opcode(cpu), cpu -> SP);
         break;
 
     case LD_N8R_A:
+        cpu_write16_at_idx(cpu, 0xFF00 + cpu_read_data_after_opcode(cpu),
+                cpu_reg_get(cpu, REG_A_CODE));
         break;
 
     case LD_R16SP_N16:

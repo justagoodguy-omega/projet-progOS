@@ -192,8 +192,12 @@ typedef enum {
  * (et supprimer ces quatre lignes de commentaire).
  */
 typedef struct {
+    opcode_kind kind;
     opcode_family family;
     opcode_t opcode;
+    uint8_t bytes;
+    uint8_t cycles;
+    uint8_t xtra_cycles;
 } instruction_t;
 
 
