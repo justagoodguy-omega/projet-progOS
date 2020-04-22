@@ -131,7 +131,7 @@ int bus_write(bus_t bus, addr_t address, data_t data)
     if(address > 0xFFFF){
         return ERR_ADDRESS;
     } else {
-        bus[address] = &data;
+        *bus[address] = data;
         return ERR_NONE; 
     }
 }
