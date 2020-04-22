@@ -12,27 +12,62 @@
 #include "cpu-registers.h"
 #include "cpu-storage.h"
 #include "util.h"
+#include "bus.h"
 
 #include <inttypes.h> // PRIX8
 #include <stdio.h> // fprintf
 
 // ======================================================================
+/**
+ * @brief Starts the cpu by initializing all registers at zero
+ *
+ * @param cpu cpu to start
+ *
+ * @return error code
+ */
 int cpu_init(cpu_t* cpu)
 {
+    M_REQUIRE_NON_NULL(cpu);
+    cpu_BC_set(cpu, 0);
+    cpu_DE_set(cpu, 0);
+    cpu_HL_set(cpu, 0);
+    cpu_AF_set(cpu, 0);
+    cpu -> PC = 0;
+    cpu -> SP = 0;
 
+    cpu -> alu.flags = 0;
+    cpu -> alu.value = 0;
+    cpu -> bus = NULL;
+    cpu -> idle_time = 0;
+   
     return ERR_NONE;
 }
 
 // ======================================================================
+/**
+ * @brief Plugs a bus into the cpu
+ *
+ * @param cpu cpu to plug into
+ * @param bus bus to plug
+ *
+ * @return error code
+ */
 int cpu_plug(cpu_t* cpu, bus_t* bus)
 {
-
+    M_REQUIRE_NON_NULL(cpu);
+    cpu -> bus = bus;
     return ERR_NONE;
 }
 
 // ======================================================================
+/**
+ * @brief Frees a cpu
+ *
+ * @param cpu cpu to free
+ */
 void cpu_free(cpu_t* cpu)
 {
+    cpu -> bus = NULL;
 }
 
 //=========================================================================
@@ -205,7 +240,9 @@ static int cpu_do_cycle(cpu_t* cpu)
 int cpu_cycle(cpu_t* cpu)
 {
     M_REQUIRE_NON_NULL(cpu);
-    M_REQUIRE_NON_NULL(cpu->bus);
-
-        return ERR_NONE;
+    uint8_t cycles = cpu -> idle_time;
+    if(cycles != 0){
+        cpu -> idle_time = cycles - 1;
+    }
+    return ERR_NONE;
 }

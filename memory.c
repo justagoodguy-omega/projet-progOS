@@ -1,10 +1,3 @@
-/**
- * @file memory.c
- * @brief Memory for Gamemu
- *
- * @author L. Rovati & P. Oliver, EPFL
- * @date 2020
- */
 #include <stdlib.h>
 #include "memory.h"
 #include "error.h"
@@ -16,8 +9,10 @@
  * @param size size of the memory to create
  * @return error code
  */
-int mem_create(memory_t* mem, size_t size){
-    if (size == 0 || mem == NULL){
+int mem_create(memory_t* mem, size_t size)
+{
+    M_REQUIRE_NON_NULL(mem);
+    if (size == 0){
         return ERR_BAD_PARAMETER;
     }
 
@@ -32,7 +27,8 @@ int mem_create(memory_t* mem, size_t size){
  *
  * @param mem memory structure pointer to destroy
  */
-void mem_free(memory_t* mem){
+void mem_free(memory_t* mem)
+{
     if (mem != NULL){
         if (mem -> memory != NULL){
             free(mem -> memory);

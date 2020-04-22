@@ -1,30 +1,24 @@
-/**
- * @file gameboy.c
- * @brief Gameboy Emulator
- * 
- * @author L. Rovati, P. Oliver, EPFL
- * @date 2020
- */ 
-
 #include <stdint.h>
 #include "gameboy.h"
 #include "error.h"
+#include "gameboy.h"
 
 /**
  * @brief Creates a gameboy
  *
  * @param gameboy pointer to gameboy to create
  */
-int gameboy_create(gameboy_t* gameboy, const char* filename){
-
+int gameboy_create(gameboy_t* gameboy, const char* filename)
+{
     M_REQUIRE_NON_NULL(gameboy);
 
     // WORK_RAM
-    char* wr = "WORK_RAM";
-    memory_t* work_mem = calloc(MEM_SIZE(wr), sizeof(uint8_t));
+    //char* wr = "WORK_RAM";
+    // ### WORK_RAM_END not recognized when using MEM_SIZE
+    memory_t* work_mem = calloc(WORK_RAM_END - WORK_RAM_START + 1, sizeof(uint8_t));
     M_REQUIRE_NON_NULL(work_mem);
 
-    component_t* workRAM = malloc(sizeof(component_t);
+    component_t* workRAM = malloc(sizeof(component_t));
     M_REQUIRE_NON_NULL(workRAM);
 
     workRAM -> mem = &work_mem;
@@ -54,18 +48,16 @@ int gameboy_create(gameboy_t* gameboy, const char* filename){
  *
  * @param gameboy pointer to gameboy to destroy
  */
-void gameboy_free(gameboy_t* gameboy){
-
+void gameboy_free(gameboy_t* gameboy)
+{
     M_REQUIRE_NON_NULL(gameboy);
 
     for (int i = 0; i < GB_NB_COMPONENTS; ++i){
-        free(components[i] -> mem);
-        components[i] -> mem = NULL;
-        free(components[i]);
-        components[i] = NULL;
+        if (components[i] != NULL){
+            component_free(components[i]);
+            components[i] = NULL;
+        }
     }
 
-    free(gameboy);
     gameboy = NULL;
-
 }

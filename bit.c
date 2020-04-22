@@ -19,7 +19,8 @@
  * @param value value to get the 4 LSB from
  * @return 4 LSB of the input
  */
-uint8_t lsb4(uint8_t value){
+uint8_t lsb4(uint8_t value)
+{
     return value & 0xf;
 }
 
@@ -30,7 +31,8 @@ uint8_t lsb4(uint8_t value){
  * @param value value to get the 4 MSB from
  * @return 4 MSB of the input
  */
-uint8_t msb4(uint8_t value){
+uint8_t msb4(uint8_t value)
+{
     return value >> 4;
 }
 
@@ -41,7 +43,8 @@ uint8_t msb4(uint8_t value){
  * @param value value to get the 8 LSB from
  * @return 8 LSB of the input
  */
-uint8_t lsb8(uint16_t value){
+uint8_t lsb8(uint16_t value)
+{
     return value & 0xff;
 }
 
@@ -52,7 +55,8 @@ uint8_t lsb8(uint16_t value){
  * @param value value to get the 8 MSB from
  * @return 8 MSB of the input
  */
-uint8_t msb8(uint16_t value){
+uint8_t msb8(uint16_t value)
+{
     return value >> 8;
 }
 
@@ -64,7 +68,8 @@ uint8_t msb8(uint16_t value){
  * @param v2 value for the 8 MSB
  * @return result of merging v1 and v2 into 16bits
  */
-uint16_t merge8(uint8_t v1, uint8_t v2){
+uint16_t merge8(uint8_t v1, uint8_t v2)
+{
     return ((v2 & 0xff) << 8) | (v1 & 0xff);
 }
 
@@ -76,7 +81,8 @@ uint16_t merge8(uint8_t v1, uint8_t v2){
  * @param v2 value for the 4 MSB
  * @return result of merging v1 and v2 into 8bits
  */
-uint8_t merge4(uint8_t v1, uint8_t v2){
+uint8_t merge4(uint8_t v1, uint8_t v2)
+{
     return ((v2 & 0xf) << 4) | (v1 & 0xf);
 }
 
@@ -88,7 +94,8 @@ uint8_t merge4(uint8_t v1, uint8_t v2){
  * @param index index of the bit
  * @return returns the bit at a given index
  */
-bit_t bit_get(uint8_t value, int index){
+bit_t bit_get(uint8_t value, int index)
+{
     return ((value & (1 << CLAMP07(index))) == 0) ? 0 : 1;
 }
 
@@ -99,7 +106,8 @@ bit_t bit_get(uint8_t value, int index){
  * @param value value to change the bit in
  * @param index index of the bit
  */
-void bit_set(uint8_t* value, int index){
+void bit_set(uint8_t* value, int index)
+{
     *value =  *value | (1 << CLAMP07(index));
 }
 
@@ -110,14 +118,23 @@ void bit_set(uint8_t* value, int index){
  * @param value value to change the bit in
  * @param index index of the bit
  */
-void bit_unset(uint8_t* value, int index){
+void bit_unset(uint8_t* value, int index)
+{
     *value = *value & ~(1 << CLAMP07(index));
 }
 
 // ======================================================================
-void bit_rotate(uint8_t* value, rot_dir_t dir, int d){
+/**
+ * @brief Rotates the bits in a uint8_t
+ *
+ * @param value pointer to the number to rotate
+ * @param dir rotation direction
+ * @param d number of rotation steps to execute
+ */
+void bit_rotate(uint8_t* value, rot_dir_t dir, int d)
+{
     uint8_t res = *value;
-    int index = d % 8;
+    int index = CLAMP07(d);
     switch (dir) {
 	case LEFT:
 		res = res >> (8 - index);
@@ -133,8 +150,15 @@ void bit_rotate(uint8_t* value, rot_dir_t dir, int d){
 }
 
 // ======================================================================
-void bit_edit(uint8_t* value, int index, uint8_t v){
-
+/**
+ * @brief Set/Unset the bit at a given index
+ *
+ * @param value value to change the bit in
+ * @param index index of the bit
+ * @param v allows to choose between set and unset
+ */
+void bit_edit(uint8_t* value, int index, uint8_t v)
+{
     if (v == 0){
         bit_unset(value, index);
     } else {
@@ -143,8 +167,11 @@ void bit_edit(uint8_t* value, int index, uint8_t v){
 }
 
 //=====================================================================
-bit_t get_MSB_8(uint8_t value){
+/**
+* @brief returns the msb of value
+* @param value the value of which we want msb
+*/
+bit_t get_MSB_8(uint8_t value)
+{
     return bit_get(value, MSB_INDEX_8);
 }
-
-

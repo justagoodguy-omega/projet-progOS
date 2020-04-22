@@ -16,34 +16,71 @@
 // ==== see cpu-storage.h ========================================
 data_t cpu_read_at_idx(const cpu_t* cpu, addr_t addr)
 {
+<<<<<<< HEAD
     data_t readData = 0;
     M_REQUIRE_NO_ERR(bus_read(cpu -> bus, addr, &readData));
     return readData; 
+=======
+    M_REQUIRE_NON_NULL(cpu);
+    M_REQUIRE_NON_NULL(cpu -> bus);
+    data_t readData = 0;
+    if(bus_read(*(cpu -> bus), addr, &readData) == 0){
+        return readData;
+    } else {
+        return 0;
+    }
+    
+>>>>>>> master
 }
 
 // ==== see cpu-storage.h ========================================
 addr_t cpu_read16_at_idx(const cpu_t* cpu, addr_t addr)
 {
+<<<<<<< HEAD
+=======
+    M_REQUIRE_NON_NULL(cpu);
+    M_REQUIRE_NON_NULL(cpu -> bus);
+>>>>>>> master
     if (addr == 0xFFFF){
         return 0xFF;
     }
     addr_t readData16 = 0;
+<<<<<<< HEAD
     M_REQUIRE_NO_ERR(bus_read16, (cpu -> bus, addr, &readData16));
     return readData16;
+=======
+    if(bus_read16(*(cpu -> bus), addr, &readData16) == 0){
+        return readData16;
+    } else {
+        return 0;
+    }
+>>>>>>> master
 }
 
 // ==== see cpu-storage.h ========================================
 int cpu_write_at_idx(cpu_t* cpu, addr_t addr, data_t data)
 {
+<<<<<<< HEAD
     M_REQUIRE_NO_ERR(bus_write(cpu -> bus, addr, data));
     return ERR_NONE;
+=======
+    M_REQUIRE_NON_NULL(cpu);
+    M_REQUIRE_NON_NULL(cpu -> bus);
+    return bus_write(*(cpu -> bus), addr, data);
+>>>>>>> master
 }
 
 // ==== see cpu-storage.h ========================================
 int cpu_write16_at_idx(cpu_t* cpu, addr_t addr, addr_t data16)
 {
+<<<<<<< HEAD
     M_REQUIRE_NO_ERR(bus_write16(cpu -> bus, addr, data16));
     return ERR_NONE;
+=======
+    M_REQUIRE_NON_NULL(cpu);
+    M_REQUIRE_NON_NULL(cpu -> bus);
+    return bus_write16(*(cpu -> bus), addr, data16);
+>>>>>>> master
 }
 
 // ==== see cpu-storage.h ========================================
