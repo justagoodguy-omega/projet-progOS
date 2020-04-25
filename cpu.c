@@ -55,6 +55,7 @@ int cpu_init(cpu_t* cpu)
 int cpu_plug(cpu_t* cpu, bus_t* bus)
 {
     M_REQUIRE_NON_NULL(cpu);
+    M_REQUIRE_NON_NULL(bus);
     cpu -> bus = bus;
     return ERR_NONE;
 }

@@ -52,29 +52,29 @@ typedef struct{
 
     union {
      struct{
-         register_8 A;
          register_8 F;
+         register_8 A;
      };
      register_16 AF;
     };
     union {
      struct{
-         register_8 B;
          register_8 C;
+         register_8 B;
      };
      register_16 BC;
     };
     union {
      struct{
-         register_8 D;
          register_8 E;
+         register_8 D;
      };
      register_16 DE;
     };
     union {
      struct{
-         register_8 H;
          register_8 L;
+         register_8 H;
      };
      register_16 HL;
     };
