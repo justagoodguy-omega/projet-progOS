@@ -1,7 +1,8 @@
 #include <stdint.h>
 #include "gameboy.h"
+#include "component.h"
+#include "bus.h"
 #include "error.h"
-#include "gameboy.h"
 
 /**
  * @brief Creates a gameboy
@@ -12,33 +13,17 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
 {
     M_REQUIRE_NON_NULL(gameboy);
 
-    // WORK_RAM
-    //char* wr = "WORK_RAM";
-    // ### WORK_RAM_END not recognized when using MEM_SIZE
-    memory_t* work_mem = calloc(WORK_RAM_END - WORK_RAM_START + 1, sizeof(uint8_t));
-    M_REQUIRE_NON_NULL(work_mem);
+    // WORK RAM
+    M_REQUIRE_NO_ERR(component_create(gameboy -> components[0],
+                MEM_SIZE(WORK_RAM)));
+    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, gameboy -> components[0],
+                WORK_RAM_START, WORK_RAM_END));
 
-    component_t* workRAM = malloc(sizeof(component_t));
-    M_REQUIRE_NON_NULL(workRAM);
-
-    workRAM -> mem = &work_mem;
-    workRAM -> start = WORK_RAM_START;
-    workRAM -> end = WORK_RAM_END;
-    
     // ECHO_RAM
-    component_t* echoRAM = malloc(sizeof(component_t));
-    M_REQUIRE_NON_NULL(echoRAM);
-    M_REQUIRE_NO_ERR(component_shared(echoRAM, workRAM));
-    echoRAM -> start = ECHO_RAM_START;
-    echoRAM -> end = ECHO_RAM_END;
-
-    // BUS
-    bus_t gb_bus;
-    M_REQUIRE_NO_ERR(bus_plug(gb_bus, workRAM, workRAM -> start, workRAM -> end));
-    M_REQUIRE_NO_ERR(bus_plug(gb_bus, echoRAM, echoRAM -> start, echoRAM -> end));
-    gameboy -> bus = gb_bus;
-    gameboy -> components[0] = workRAM;
-    gameboy -> components[1] = echoRAM;
+    M_REQUIRE_NO_ERR(component_shared(gameboy -> components[1],
+                gameboy -> components[0]));
+    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, gameboy -> components[1],
+                ECHO_RAM_START, ECHO_RAM_END));
 
     return ERR_NONE;
 }
@@ -50,14 +35,14 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
  */
 void gameboy_free(gameboy_t* gameboy)
 {
-    M_REQUIRE_NON_NULL(gameboy);
-
-    for (int i = 0; i < GB_NB_COMPONENTS; ++i){
-        if (components[i] != NULL){
-            component_free(components[i]);
-            components[i] = NULL;
+    if (gameboy != NULL){
+        for (int i = 0; i < GB_NB_COMPONENTS; ++i){
+            if (gameboy -> components[i] != NULL){
+                component_free(gameboy -> components[i]);
+                gameboy -> components[i] = NULL;
+            }
         }
-    }
 
-    gameboy = NULL;
+        gameboy = NULL;
+    }
 }
