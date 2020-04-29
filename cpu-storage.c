@@ -95,8 +95,8 @@ int cpu_dispatch_storage(const instruction_t* lu, cpu_t* cpu)
         break;
 
     case LD_A_HLRU:
-        //cpu_reg_set(cpu, REG_A_CODE, cpu_read_at_idx(cpu, cpu_HL_get(cpu)));
-        //cpu_HL_set(cpu, cpu_HL_get(cpu) + extract_HL_increment(lu -> opcode));
+        cpu_reg_set(cpu, REG_A_CODE, cpu_read_at_idx(cpu, cpu_HL_get(cpu)));
+        cpu_HL_set(cpu, cpu_HL_get(cpu) + extract_HL_increment(lu -> opcode));
         break;
 
     case LD_A_N16R:
@@ -132,7 +132,7 @@ int cpu_dispatch_storage(const instruction_t* lu, cpu_t* cpu)
         break;
 
     case LD_HLR_R8:
-        cpu_write_at_HL(cpu, extract_reg(lu -> opcode, 0));
+        cpu_write_at_HL(cpu, cpu_reg_get(cpu, extract_reg(lu -> opcode, 0)));
         break;
 
     case LD_N16R_A:
@@ -151,7 +151,7 @@ int cpu_dispatch_storage(const instruction_t* lu, cpu_t* cpu)
         break;
 
     case LD_R16SP_N16:
-        cpu_reg_pair_set(cpu, extract_reg_pair(lu -> opcode),
+        cpu_reg_pair_SP_set(cpu, extract_reg_pair(lu -> opcode),
                 cpu_read_addr_after_opcode(cpu));
         break;
 
