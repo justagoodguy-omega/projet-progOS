@@ -120,13 +120,11 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
 
     // ADD
     case ADD_A_HLR: {
-        do_cpu_arithm(cpu, alu_add8, cpu_read_at_HL(cpu) +
-                extract_carry(cpu, lu -> opcode), ADD_FLAGS_SRC);
+        do_cpu_arithm(cpu, alu_add8, cpu_read_at_HL(cpu), ADD_FLAGS_SRC);
     } break;
 
     case ADD_A_N8: {
-        do_cpu_arithm(cpu, alu_add8, cpu_read_data_after_opcode(cpu) +
-            extract_carry(cpu, lu -> opcode), ADD_FLAGS_SRC);
+        do_cpu_arithm(cpu, alu_add8, cpu_read_data_after_opcode(cpu), ADD_FLAGS_SRC);
     } break;
 
     case ADD_A_R8: {
@@ -171,14 +169,15 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
 
     // BIT MOVE (rotate, shift)
     case SLA_R8: {
-        M_REQUIRE_NO_ERR(alu_shift(&(cpu -> alu), extract_reg(lu -> opcode, 0),
-                LEFT));
+        M_REQUIRE_NO_ERR(alu_shift(&(cpu -> alu),
+                cpu_reg_get(cpu, extract_reg(lu -> opcode, 0)), LEFT));
         cpu_reg_set(cpu, extract_reg(lu -> opcode, 0), cpu -> alu.value);
         cpu_combine_alu_flags(cpu, SHIFT_FLAGS_SRC);
     } break;
 
     case ROT_R8: {
-        M_REQUIRE_NO_ERR(alu_carry_rotate(&(cpu -> alu), extract_reg(lu -> opcode, 0), 
+        M_REQUIRE_NO_ERR(alu_carry_rotate(&(cpu -> alu),
+                cpu_reg_get(cpu, extract_reg(lu -> opcode, 0)), 
                 extract_rot_dir(lu -> opcode), extract_carry(cpu, lu -> opcode)));
         cpu_reg_set(cpu, extract_reg(lu -> opcode, 0), cpu -> alu.value);
         cpu_combine_alu_flags(cpu, ROT_FLAGS_SRC);
@@ -187,14 +186,15 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
 
     // BIT TESTS (and set)
     case BIT_U3_R8: {
-        M_REQUIRE_NO_ERR(alu_sub8(&(cpu -> alu), bit_get(cpu_reg_get(
-                cpu, extract_reg(lu -> opcode, 0)), extract_n3(lu -> opcode)), 1, 0));
-        cpu_combine_alu_flags(cpu, ALU, SET, CLEAR, CPU);
+        M_REQUIRE_NO_ERR(alu_add8(&(cpu -> alu), bit_get(cpu_reg_get(
+                cpu, extract_reg(lu -> opcode, 0)), extract_n3(lu -> opcode)), 0, 0));
+        cpu_combine_alu_flags(cpu, ALU, CLEAR, SET, CPU);
     } break;
 
     case CHG_U3_R8: {
         data_t data = cpu_reg_get(cpu, extract_reg(lu -> opcode, 0));
         do_set_or_res(lu, &data);
+        cpu_reg_set(cpu, extract_reg(lu -> opcode, 0), data);
     } break;
 
     // ---------------------------------------------------------
