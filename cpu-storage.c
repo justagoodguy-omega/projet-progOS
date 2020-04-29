@@ -24,7 +24,6 @@ data_t cpu_read_at_idx(const cpu_t* cpu, addr_t addr)
     } else {
         return 0;
     }
-    
 }
 
 // ==== see cpu-storage.h ========================================
@@ -83,21 +82,21 @@ int cpu_dispatch_storage(const instruction_t* lu, cpu_t* cpu)
 
     switch (lu->family) {
     case LD_A_BCR:
-        cpu_reg_set(cpu, REG_A_CODE, cpu_BC_get(cpu));
+        cpu_reg_set(cpu, REG_A_CODE, cpu_read_at_idx(cpu, cpu_BC_get(cpu)));
         break;
 
     case LD_A_CR:
-        cpu_reg_set(cpu, REG_A_CODE,
-                cpu_read_at_idx(cpu, 0xFF00 + cpu_reg_get(cpu, REG_C_CODE)));
+        cpu_reg_set(cpu, REG_A_CODE, cpu_read_at_idx(cpu, 
+                0xFF00 + cpu_reg_get(cpu, REG_C_CODE)));
         break;
 
     case LD_A_DER:
-        cpu_reg_set(cpu, REG_A_CODE, cpu_DE_get(cpu));
+        cpu_reg_set(cpu, REG_A_CODE, cpu_read_at_idx(cpu, cpu_DE_get(cpu)));
         break;
 
     case LD_A_HLRU:
-        cpu_reg_set(cpu, REG_A_CODE, cpu_HL_get(cpu));
-        cpu_HL_set(cpu, cpu_HL_get(cpu) + extract_HL_increment(lu -> opcode));
+        //cpu_reg_set(cpu, REG_A_CODE, cpu_read_at_idx(cpu, cpu_HL_get(cpu)));
+        //cpu_HL_set(cpu, cpu_HL_get(cpu) + extract_HL_increment(lu -> opcode));
         break;
 
     case LD_A_N16R:
@@ -107,15 +106,15 @@ int cpu_dispatch_storage(const instruction_t* lu, cpu_t* cpu)
 
     case LD_A_N8R:
         cpu_reg_set(cpu, REG_A_CODE,
-                cpu_read_at_idx(cpu, 0xFF00 + cpu_read_data_after_opcode(cpu)));
+                cpu_read_at_idx(cpu, REGISTERS_START + cpu_read_data_after_opcode(cpu)));
         break;
 
     case LD_BCR_A:
-        cpu_write_at_idx(cpu, cpu_HL_get(cpu), cpu_reg_get(cpu, REG_A_CODE));
+        cpu_write_at_idx(cpu, cpu_BC_get(cpu), cpu_reg_get(cpu, REG_A_CODE));
         break;
 
     case LD_CR_A:
-        cpu_write_at_idx(cpu, 0xFF00 + cpu_reg_get(cpu, REG_C_CODE),
+        cpu_write_at_idx(cpu, REGISTERS_START + cpu_reg_get(cpu, REG_C_CODE),
                 cpu_reg_get(cpu, REG_A_CODE));
         break;
 
@@ -137,38 +136,58 @@ int cpu_dispatch_storage(const instruction_t* lu, cpu_t* cpu)
         break;
 
     case LD_N16R_A:
-        cpu_write16_at_idx(cpu, cpu_read_addr_after_opcode(cpu),
+        cpu_write_at_idx(cpu, cpu_read_addr_after_opcode(cpu),
                 cpu_reg_get(cpu, REG_A_CODE));
         break;
 
     case LD_N16R_SP:
-        cpu_write16_at_idx(cpu, cpu_read_addr_after_opcode(cpu), cpu -> SP);
+        cpu_write16_at_idx(cpu, cpu_read_addr_after_opcode(cpu),
+                cpu_reg_pair_SP_get(cpu, REG_AF_CODE));
         break;
 
     case LD_N8R_A:
-        cpu_write16_at_idx(cpu, 0xFF00 + cpu_read_data_after_opcode(cpu),
+        cpu_write_at_idx(cpu, REGISTERS_START + cpu_read_data_after_opcode(cpu),
                 cpu_reg_get(cpu, REG_A_CODE));
         break;
 
     case LD_R16SP_N16:
+        cpu_reg_pair_set(cpu, extract_reg_pair(lu -> opcode),
+                cpu_read_addr_after_opcode(cpu));
         break;
 
     case LD_R8_HLR:
+        cpu_reg_set(cpu, extract_reg(lu -> opcode, 3), cpu_read_at_HL(cpu));
         break;
 
     case LD_R8_N8:
+        cpu_reg_set(cpu, extract_reg(lu -> opcode, 3),
+                cpu_read_data_after_opcode(cpu));
         break;
 
     case LD_R8_R8: {
+        reg_kind s = extract_reg(lu -> opcode, 0);
+        reg_kind r = extract_reg(lu -> opcode, 3);
+        if (s != r){
+            cpu_reg_set(cpu, r, cpu_reg_get(cpu, s));
+        }
     } break;
 
     case LD_SP_HL:
+        cpu_reg_pair_SP_set(cpu, REG_AF_CODE, cpu_HL_get(cpu));
         break;
 
     case POP_R16:
+        cpu_reg_pair_set(cpu, extract_reg_pair(lu -> opcode),
+                cpu_read16_at_idx(cpu, cpu_reg_pair_SP_get(cpu, REG_AF_CODE)));
+        cpu_reg_pair_SP_set(cpu, REG_AF_CODE,
+                cpu_reg_pair_SP_get(cpu, REG_AF_CODE) + 2);
         break;
 
     case PUSH_R16:
+        cpu_reg_pair_SP_set(cpu, REG_AF_CODE,
+                cpu_reg_pair_SP_get(cpu, REG_AF_CODE) - 2);
+        cpu_write16_at_idx(cpu, cpu_reg_pair_SP_get(cpu, REG_AF_CODE),
+                cpu_reg_pair_get(cpu, extract_reg_pair(lu -> opcode)));
         break;
 
     default:

@@ -13,6 +13,7 @@
 
 #include "bus.h"
 #include "component.h"
+#include "cpu.h"
 
 #ifdef __cplusplus
 extern "C" {

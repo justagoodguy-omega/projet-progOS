@@ -236,9 +236,14 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
 static int cpu_do_cycle(cpu_t* cpu)
 {
     M_REQUIRE_NON_NULL(cpu);
-    opcode_t nextOP = cpu_read_at_idx(cpu, cpu -> PC);
-    instruction_t nextInst = instruction_direct(nextOP);
-    M_REQUIRE_NO_ERR(cpu_dispatch(&nextInst, cpu));
+    opcode_t next_op = cpu_read_at_idx(cpu, cpu -> PC);
+    if (next_op == 0xCB){
+        instruction_t next_instruction = instruction_prefixed[cpu_read_data_after_opcode(cpu)];
+        M_REQUIRE_NO_ERR(cpu_dispatch(&next_instruction, cpu));
+    } else {
+        instruction_t next_instruction = instruction_direct[next_op];
+        M_REQUIRE_NO_ERR(cpu_dispatch(&next_instruction, cpu));
+    }
 
     return ERR_NONE;
 }

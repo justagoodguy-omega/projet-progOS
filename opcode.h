@@ -187,10 +187,6 @@ typedef enum {
 /**
  * @brief Type to represent Instruction
  */
-/* TODO WEEK 08:
- * Définir ici proprement le type instruction_t
- * (et supprimer ces quatre lignes de commentaire).
- */
 typedef struct {
     opcode_kind kind;
     opcode_family family;
