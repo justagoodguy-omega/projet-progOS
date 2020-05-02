@@ -23,7 +23,7 @@ CFLAGS += -std=c11 -Wall -pedantic -g
 # all those libs are required on Debian, feel free to adapt it to your box
 LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 
-all:: unit-test-cpu-dispatch-week08
+all:: unit-test-alu unit-test-cpu-dispatch-week08
 
 unit-test-bit : unit-test-bit.o bit.o
 unit-test-alu : unit-test-alu.o alu.o bit.o
@@ -65,7 +65,7 @@ unit-test-memory.o: unit-test-memory.c tests.h error.h bus.h memory.h component.
 
 
 TARGETS := 
-CHECK_TARGETS := unit-test-cpu-dispatch-week08
+CHECK_TARGETS := unit-test-alu unit-test-cpu-dispatch-week08
 OBJS = 
 OBJS_NO_STATIC_TESTS =
 OBJS_STATIC_TESTS = 

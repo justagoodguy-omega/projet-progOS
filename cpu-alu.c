@@ -178,7 +178,7 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
     case ROT_R8: {
         M_REQUIRE_NO_ERR(alu_carry_rotate(&(cpu -> alu),
                 cpu_reg_get(cpu, extract_reg(lu -> opcode, 0)), 
-                extract_rot_dir(lu -> opcode), extract_carry(cpu, lu -> opcode)));
+                extract_rot_dir(lu -> opcode), cpu -> alu.flags));
         cpu_reg_set(cpu, extract_reg(lu -> opcode, 0), cpu -> alu.value);
         cpu_combine_alu_flags(cpu, ROT_FLAGS_SRC);
     } break;
