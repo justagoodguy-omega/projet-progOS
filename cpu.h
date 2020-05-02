@@ -81,6 +81,8 @@ typedef struct{
     
     register_16 PC;
     register_16 SP;
+
+    addr_t write_listener;
 } cpu_t;
 
 //=========================================================================

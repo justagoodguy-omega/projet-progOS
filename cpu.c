@@ -39,6 +39,7 @@ int cpu_init(cpu_t* cpu)
     cpu -> alu.value = 0;
     cpu -> bus = NULL;
     cpu -> idle_time = 0;
+    cpu -> write_listener = 0;
    
     return ERR_NONE;
 }
@@ -236,6 +237,7 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
 static int cpu_do_cycle(cpu_t* cpu)
 {
     M_REQUIRE_NON_NULL(cpu);
+    cpu -> write_listener = 0;
     opcode_t next_op = cpu_read_at_idx(cpu, cpu -> PC);
     if (next_op == 0xCB){
         instruction_t next_instruction = instruction_prefixed[cpu_read_data_after_opcode(cpu)];
