@@ -226,7 +226,7 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
 
     } // switch
 
-    cpu -> idle_time = cpu -> idle_time - lu -> cycles;
+    cpu -> idle_time = cpu -> idle_time + lu -> cycles;
     cpu -> PC = cpu -> PC + lu -> bytes;
 
     return ERR_NONE;
@@ -254,8 +254,11 @@ static int cpu_do_cycle(cpu_t* cpu)
  */
 int cpu_cycle(cpu_t* cpu)
 {
-    M_REQUIRE_NON_NULL(cpu);
-    cpu_do_cycle(cpu);
+    cpu -> idle_time = cpu -> idle_time - 1;
+    if (cpu -> idle_time == 0){
+        M_REQUIRE_NON_NULL(cpu);
+        cpu_do_cycle(cpu);
+    }
 
     return ERR_NONE;
 }
