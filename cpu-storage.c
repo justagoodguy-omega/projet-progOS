@@ -47,6 +47,7 @@ int cpu_write_at_idx(cpu_t* cpu, addr_t addr, data_t data)
 {
     M_REQUIRE_NON_NULL(cpu);
     M_REQUIRE_NON_NULL(cpu -> bus);
+    cpu -> write_listener = addr;
     return bus_write(*(cpu -> bus), addr, data);
 }
 
@@ -55,6 +56,7 @@ int cpu_write16_at_idx(cpu_t* cpu, addr_t addr, addr_t data16)
 {
     M_REQUIRE_NON_NULL(cpu);
     M_REQUIRE_NON_NULL(cpu -> bus);
+    cpu -> write_listener = addr;
     return bus_write16(*(cpu -> bus), addr, data16);
 }
 
