@@ -2,6 +2,7 @@
 #include <stdint.h>   // for uint8_t and uint16_t types
 #include <inttypes.h> // for PRIx8, etc.
 #include "bit.h"
+#include "error.h"
 
 // ======================================================================
 #define size(T) (sizeof T / sizeof T[0])
@@ -108,6 +109,7 @@ bit_t bit_get(uint8_t value, int index)
  */
 void bit_set(uint8_t* value, int index)
 {
+    M_REQUIRE_NON_NULL(value);
     *value =  *value | (1 << CLAMP07(index));
 }
 
@@ -120,6 +122,7 @@ void bit_set(uint8_t* value, int index)
  */
 void bit_unset(uint8_t* value, int index)
 {
+    M_REQUIRE_NON_NULL(value);
     *value = *value & ~(1 << CLAMP07(index));
 }
 
@@ -133,6 +136,7 @@ void bit_unset(uint8_t* value, int index)
  */
 void bit_rotate(uint8_t* value, rot_dir_t dir, int d)
 {
+    M_REQUIRE_NON_NULL(value);
     uint8_t res = *value;
     int index = CLAMP07(d);
     switch (dir) {
@@ -159,6 +163,7 @@ void bit_rotate(uint8_t* value, rot_dir_t dir, int d)
  */
 void bit_edit(uint8_t* value, int index, uint8_t v)
 {
+    M_REQUIRE_NON_NULL(value);
     if (v == 0){
         bit_unset(value, index);
     } else {

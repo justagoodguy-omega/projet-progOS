@@ -24,7 +24,11 @@ int component_create(component_t* c, size_t mem_size)
         return ERR_NONE;
     } else {
         M_EXIT_IF_NULL(c -> mem = (memory_t*)malloc(sizeof(memory_t)), sizeof(memory_t));
-        M_REQUIRE_NO_ERR(mem_create(c -> mem, mem_size));
+        int ERR = mem_create(c -> mem, mem_size);
+        if (ERR != ERR_NONE){
+            mem_free(c -> mem);
+            return ERR;
+        }
     }
 
     c -> start = 0;
@@ -43,6 +47,7 @@ int component_shared(component_t* c, component_t* c_old)
 {
     M_REQUIRE_NON_NULL(c);
     M_REQUIRE_NON_NULL(c_old);
+    M_REQUIRE_NON_NULL(c_old -> mem);
 
     c -> start = 0;
     c -> end = 0;
@@ -58,12 +63,14 @@ int component_shared(component_t* c, component_t* c_old)
  */
 void component_free(component_t* c)
 {
-    if (c -> mem != NULL){
-        mem_free(c -> mem);
-        free(c -> mem);
-        c -> mem = NULL;
+    if (c != NULL){
+        if (c -> mem != NULL){
+            mem_free(c -> mem);
+            free(c -> mem);
+            c -> mem = NULL;
+        }
+        c -> start = 0;
+        c -> end = 0;
+        c = NULL;
     }
-    c -> start = 0;
-    c -> end = 0;
-    c = NULL;
 }
