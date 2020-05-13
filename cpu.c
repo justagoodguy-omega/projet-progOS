@@ -258,6 +258,7 @@ static int cpu_do_cycle(cpu_t* cpu)
  */
 int cpu_cycle(cpu_t* cpu)
 {
+    cpu -> write_listener = 0;
     cpu -> idle_time = cpu -> idle_time - 1;
     if (cpu -> idle_time == 0){
         M_REQUIRE_NON_NULL(cpu);

@@ -7,18 +7,26 @@
 // ======================================================================
 int bootrom_init(component_t* c)
 {
+    M_REQUIRE_NON_NULL(c);
     M_REQUIRE_NO_ERR(component_create(c, MEM_SIZE(BOOT_ROM)));
-    c -> mem -> memory = GAMEBOY_BOOT_ROM_CONTENT;
+    uint16_t content[MEM_SIZE(BOOT_ROM)] = GAMEBOY_BOOT_ROM_CONTENT;
+    for (size_t i = 0; i < MEM_SIZE(BOOT_ROM); ++i){
+        *(c -> mem -> memory + i) = content[i];
+    }
+    
     return ERR_NONE;
 }
 
 // ======================================================================
 int bootrom_bus_listener(gameboy_t* gameboy, addr_t addr)
 {
+    M_REQUIRE_NON_NULL(gameboy);
     if (gameboy -> boot){
-        M_REQUIRE_NO_ERR(bus_unplug(gameboy -> bus, &(gameboy -> bootrom)));
-        cartridge_plug();
-        gameboy -> bootrom = 0;
+        if (addr == REG_BOOT_ROM_DISABLE){
+            M_REQUIRE_NO_ERR(bus_unplug(gameboy -> bus, &(gameboy -> bootrom)));
+            M_REQUIRE_NO_ERR(cartridge_plug(&(gameboy -> cartridge), gameboy -> bus));
+            gameboy -> boot = 0;
+        }
     }
 
     return ERR_NONE;

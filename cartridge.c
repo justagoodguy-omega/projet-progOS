@@ -7,8 +7,6 @@
 #include "memory.h"
 #include "cartridge.h"
 
-#define 
-
 // ======================================================================
 int cartridge_init_from_file(component_t* c, const char* filename)
 {
@@ -18,12 +16,12 @@ int cartridge_init_from_file(component_t* c, const char* filename)
     if (f == NULL || feof(f) || ferror(f)){
         return ERR_IO;
     }
-    data_t* memory = calloc(BANK_ROM_SIZE, data_t);
+    data_t* memory = calloc(BANK_ROM_SIZE, sizeof(data_t));
 
     uint8_t value_read = 0;
     uint16_t addr_read = 0;
     size_t size = 0;
-    char* test_rep = calloc(18, char);
+    char* test_rep = calloc(18, sizeof(char));
 
     while (!feof(f) && !ferror(f) && size < BANK_ROM_SIZE){
         int err_check = 0;
@@ -80,7 +78,7 @@ int cartridge_init(cartridge_t* ct, const char* filename)
 }
 
 // ======================================================================
-int cartridge_plug(cartridge_t* ct, bus_t bus);
+int cartridge_plug(cartridge_t* ct, bus_t bus)
 {
     M_REQUIRE_NO_ERR(bus_forced_plug(bus, &(ct -> c), BANK_ROM0_START, BANK_ROM1_END, 0));
     return ERR_NONE;

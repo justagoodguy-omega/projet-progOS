@@ -4,6 +4,7 @@
 #include "bus.h"
 #include "error.h"
 #include "bootrom.h"
+#include "timer.h"
 
 // ======================================================================
 int gameboy_create(gameboy_t* gameboy, const char* filename)
@@ -40,10 +41,20 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
     gameboy -> echo_ram = *echo_ram;
     /*### END CORR ###*/
 
+    //TIMER
+    gameboy -> timer.cpu = cpu;
+    gameboy -> timer.counter = 0;
+
+    //CARTRIDGE
+    cartridge_t* cartridge = (cartridge_t*)malloc(sizeof(cartridge_t));
+    M_REQUIRE_NO_ERR(cartridge_init(cartridge, filename));
+    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, cartridge, BANK_ROM0_START,
+            BANK_ROM1_END));
+    gameboy -> cartridge = *cartridge;
+
     // BOOT ROM
     M_REQUIRE_NO_ERR(bootrom_init(&(gameboy -> bootrom)));
     bootrom_plug(&(gameboy -> bootrom), gameboy -> bus);
-
     gameboy -> boot = 1;
 
     return ERR_NONE;
@@ -60,15 +71,26 @@ void gameboy_free(gameboy_t* gameboy)
                 component_free(&(gameboy -> components[i]));
             }
         }
+        //free echo_ram
         if (&(gameboy -> echo_ram) != NULL){
             bus_unplug(gameboy -> bus, &(gameboy -> echo_ram));
             component_free(&(gameboy -> echo_ram));
         }
+        //free cpu
         if (&(gameboy -> cpu) != NULL){
             cpu_free(&(gameboy -> cpu));
         }
         // what to do with bus??
         /*### END CORR ###*/
+
+        //free bootrom
+        if(&(gameboy -> bootrom) != NULL){
+            bus_unplug(gameboy -> bus, &(gameboy -> bootrom));
+            component_free(&(gameboy -> bootrom));
+        }
+        //free cartridge
+
+
         gameboy = NULL;
     }
 }
@@ -77,4 +99,9 @@ void gameboy_free(gameboy_t* gameboy)
 int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
 {
     M_REQUIRE_NO_ERR(bootrom_bus_listener(gameboy, gameboy -> cpu.PC));
+    M_REQUIRE_NO_ERR(timer_cycle(gameboy -> timer));
+    M_REQUIRE_NO_ERR(cpu_cycle(&(gameboy -> cpu)));
+    M_REQUIRE_NO_ERR(timer_bus_listener(gameboy -> timer, gameboy -> cpu.PC));
+
+    return ERR_NONE;
 }
