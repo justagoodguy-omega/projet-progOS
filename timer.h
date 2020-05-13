@@ -33,10 +33,10 @@ extern "C" {
 /**
  * @brief Timer type
  */
-/* TODO WEEK 10:
- * Définir ici le type gbtimer_t
- * (et supprimer ces quatre lignes de commentaire).
- */
+typedef struct {
+    cpu_t* cpu;
+    uint16_t counter;
+} gbtimer_t;
 
 /**
  * @brief Initiates a timer

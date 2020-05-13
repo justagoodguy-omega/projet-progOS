@@ -24,7 +24,9 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
 
     // BOOT ROM
     M_REQUIRE_NO_ERR(bootrom_init(&(gameboy -> bootrom)));
-    bootrom_plug(gameboy -> bootrom, gameboy -> bus);
+    bootrom_plug(&(gameboy -> bootrom), gameboy -> bus);
+
+    gameboy -> boot = 1;
 
     return ERR_NONE;
 }
