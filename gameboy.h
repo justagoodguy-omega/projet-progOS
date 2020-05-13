@@ -34,7 +34,7 @@ typedef struct {
     component_t echo_ram;
     component_t bootrom;
     bit_t boot;
-    timer_t timer;
+    gbtimer_t timer;
     cartridge_t cartridge;
     cpu_t cpu;
 } gameboy_t;

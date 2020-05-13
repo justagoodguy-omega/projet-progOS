@@ -5,6 +5,8 @@
 #include "error.h"
 #include "bootrom.h"
 #include "timer.h"
+#include "cartridge.h"
+
 
 // ======================================================================
 int gameboy_create(gameboy_t* gameboy, const char* filename)
@@ -19,10 +21,10 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
     M_REQUIRE_NON_NULL(cpu);
     M_REQUIRE_NO_ERR(cpu_init(cpu));
     bus_t bus; //how to init??
-
+    /*
     gameboy -> bus = bus;
     gameboy -> components = comps;
-    gameboy -> cpu = *cpu;
+    gameboy -> cpu = *cpu;*/
     /*### END CORR ###*/
 
     // WORK RAM
@@ -51,11 +53,11 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
     M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, cartridge, BANK_ROM0_START,
             BANK_ROM1_END));
     gameboy -> cartridge = *cartridge;
-
+/*
     // BOOT ROM
     M_REQUIRE_NO_ERR(bootrom_init(&(gameboy -> bootrom)));
     bootrom_plug(&(gameboy -> bootrom), gameboy -> bus);
-    gameboy -> boot = 1;
+  */  gameboy -> boot = 1;
 
     return ERR_NONE;
 }
@@ -98,10 +100,10 @@ void gameboy_free(gameboy_t* gameboy)
 // ======================================================================
 int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
 {
-    M_REQUIRE_NO_ERR(bootrom_bus_listener(gameboy, gameboy -> cpu.PC));
-    M_REQUIRE_NO_ERR(timer_cycle(gameboy -> timer));
+    //M_REQUIRE_NO_ERR(bootrom_bus_listener(gameboy, gameboy -> cpu.PC));
+    M_REQUIRE_NO_ERR(timer_cycle(&(gameboy -> timer)));
     M_REQUIRE_NO_ERR(cpu_cycle(&(gameboy -> cpu)));
-    M_REQUIRE_NO_ERR(timer_bus_listener(gameboy -> timer, gameboy -> cpu.PC));
+    M_REQUIRE_NO_ERR(timer_bus_listener(&(gameboy -> timer), gameboy -> cpu.PC));
 
     return ERR_NONE;
 }

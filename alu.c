@@ -141,14 +141,16 @@ int alu_add16_high(alu_output_t* result, uint16_t x, uint16_t y)
 {
     M_REQUIRE_NON_NULL(result);
     
-    uint16_t v1 = lsb8(x) + lsb8(y);
-    uint8_t v1_high = lsb4(x >> 8) + lsb4(y >> 8);
-    uint16_t v2 = msb8(x) + msb8(y) + msb8(v1);
-    uint8_t v2_high = msb4(x >> 8) + msb4(y >> 8) + msb4(v1_high);
-    uint16_t res = merge8(v1, v2);
+    alu_output_t low_add = {0,0};
+    alu_output_t high_add = {0,0};
+
+    M_REQUIRE_NO_ERR(alu_add8(&low_add, x & 0xFF, y & 0xFF, 0));
+    M_REQUIRE_NO_ERR(alu_add8(&high_add, x >> 8, y >> 8, get_C(low_add.flags) >> 4));
+    uint16_t res = merge8(low_add.value, high_add.value);
+
     (result -> value) = res;
     (result -> flags) = 0;
-    M_REQUIRE_NO_ERR(set_flags_value(result, res, msb4(v1_high), msb4(v2_high)));
+    M_REQUIRE_NO_ERR(set_flags_value(result, res, get_H(high_add.flags) >> 5, get_C(high_add.flags) >> 4));
 
     return ERR_NONE;
 }
@@ -167,31 +169,25 @@ int alu_shift(alu_output_t* result, uint8_t x, rot_dir_t dir)
     M_REQUIRE_NON_NULL(result);
     (result -> flags) = 0;
     uint8_t shift_result = x;
+    bit_t setC = 0;
+    bit_rotate(&shift_result, dir, 1);
 
     switch (dir) {
-	case LEFT:
-		if(bit_get(shift_result, MSB_INDEX_8)){
-            set_C(&(result -> flags));
-        }
-        bit_rotate(&shift_result, dir, 1);
+	case LEFT:{
+        setC = bit_get(x, MSB_INDEX_8);
         bit_unset(&shift_result, 0);
         break;
-
-	case RIGHT:
-		if (bit_get(shift_result, 0)){
-            set_C(&(result -> flags));
-        }
-        bit_rotate(&shift_result, dir, 1);
+    }
+	case RIGHT:{
+		setC = bit_get(x, 0);
         bit_unset(&shift_result, MSB_INDEX_8);
         break;
-
+    }
     default: 
         return ERR_BAD_PARAMETER;
     }
 
-    if (shift_result == 0) {
-        set_Z(&(result -> flags));
-    }
+    M_REQUIRE_NO_ERR(set_flags_value(result, shift_result, 0, setC));
     result -> value = shift_result;
     return ERR_NONE;
 }
@@ -272,7 +268,7 @@ int alu_carry_rotate(alu_output_t* result, uint8_t x, rot_dir_t dir, flags_t fla
     M_REQUIRE_NON_NULL(result);
     (result -> flags) = 0;
     bit_t carry_out = 0;
-    uint8_t shift_result = 0;
+    uint8_t shift_result = x;
     bit_rotate(&shift_result, dir, 1);
 
     switch (dir) {
@@ -286,7 +282,7 @@ int alu_carry_rotate(alu_output_t* result, uint8_t x, rot_dir_t dir, flags_t fla
         break;
 
 	case RIGHT:
-		carry_out = bit_get(shift_result, MSB_INDEX_8);
+		carry_out = bit_get(x, 0);
         if(get_C(flags) != 0){
             bit_set(&shift_result, MSB_INDEX_8);
         } else {

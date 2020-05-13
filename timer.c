@@ -22,13 +22,13 @@ int timer_incr_if_state_change(gbtimer_t* timer, bit_t old_state)
     M_REQUIRE_NO_ERR(timer_state(timer, &new_state));
     if (old_state == 1 &  new_state == 0){
         uint8_t secondary_counter;
-        M_REQUIRE_NO_ERR(bus_read(timer -> cpu -> bus, REG_TIMA,
+        M_REQUIRE_NO_ERR(bus_read(&(timer -> cpu -> bus), REG_TIMA,
                 &secondary_counter));
         if (secondary_counter == 0xFF){
             uint8_t reinit;
             M_REQUIRE_NO_ERR(bus_read(timer -> cpu -> bus, REG_TMA, &reinit));
             M_REQUIRE_NO_ERR(bus_write(timer -> cpu -> bus, REG_TIMA, reinit));
-            cpu_request_interrupt(timer -> cpu, TIMER);
+            //cpu_request_interrupt(timer -> cpu, TIMER);
         } else {
             M_REQUIRE_NO_ERR(bus_write(timer -> cpu -> bus, REG_TMA,
                     secondary_counter + 1));
@@ -51,7 +51,7 @@ int timer_init(gbtimer_t* timer, cpu_t* cpu)
 int timer_cycle(gbtimer_t* timer)
 {
     bit_t old_state;
-    M_REQUIRE_NO_ERR(timer_state(timer, old_state));
+    M_REQUIRE_NO_ERR(timer_state(timer, &old_state));
     timer -> counter = timer -> counter + 4;
     M_REQUIRE_NO_ERR(bus_write(timer -> cpu -> bus, REG_DIV,
             msb8(timer -> counter)));
@@ -66,14 +66,14 @@ int timer_bus_listener(gbtimer_t* timer, addr_t addr)
     switch(addr){
         case REG_DIV:{
             bit_t old_state;
-            M_REQUIRE_NO_ERR(timer_state(timer, old_state));
+            M_REQUIRE_NO_ERR(timer_state(timer, &old_state));
             timer -> counter = 0;
             M_REQUIRE_NO_ERR(timer_incr_if_state_change(timer, old_state));
             break;
         }
         case REG_TAC:{
             bit_t old_state;
-            M_REQUIRE_NO_ERR(timer_state(timer, old_state));
+            M_REQUIRE_NO_ERR(timer_state(timer, &old_state));
             M_REQUIRE_NO_ERR(timer_incr_if_state_change(timer, old_state));
             break;
         }
