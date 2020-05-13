@@ -14,6 +14,7 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
     M_REQUIRE_NON_NULL(gameboy);
 
     /*### CORR ###*/
+    //init components?
     component_t* comps = calloc(GB_NB_COMPONENTS, sizeof(component_t));
     M_REQUIRE_NON_NULL(comps);
     cpu_t* cpu = (cpu_t*)malloc(sizeof(cpu_t));
@@ -21,7 +22,7 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
     M_REQUIRE_NO_ERR(cpu_init(cpu));
     bus_t bus; //how to init??
 
-    gaemboy -> bus = bus;
+    gameboy -> bus = bus;
     gameboy -> components = comps;
     gameboy -> cpu = *cpu;
     /*### END CORR ###*/
@@ -36,10 +37,10 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
     /*### CORR ###*/
     // what to do with a temp component?? Stock in gameboy?
     component_t* echo_ram = (component_t*)malloc(sizeof(component_t));
-    gameboy -> echo_ram = *echo_ram;
-    M_REQUIRE_NO_ERR(component_shared(echo_ram), &(gameboy -> components[0]));
-    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, echo_ram), ECHO_RAM_START,
+    M_REQUIRE_NO_ERR(component_shared(echo_ram, &(gameboy -> components[0])));
+    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, echo_ram, ECHO_RAM_START,
             ECHO_RAM_END));
+    gameboy -> echo_ram = *echo_ram;
     /*### END CORR ###*/
 
     return ERR_NONE;
@@ -61,7 +62,7 @@ void gameboy_free(gameboy_t* gameboy)
             }
         }
         if (&(gameboy -> echo_ram) != NULL){
-            bus_unplug(gaemboy -> bus, &(gameboy -> echo_ram));
+            bus_unplug(gameboy -> bus, &(gameboy -> echo_ram));
             component_free(&(gameboy -> echo_ram));
         }
         if (&(gameboy -> cpu) != NULL){
