@@ -28,6 +28,8 @@ extern "C" {
 typedef struct {
     bus_t bus;
     component_t* components[GB_NB_COMPONENTS];
+    component_t bootrom;
+    bit_t boot;
     cpu_t cpu;
 
 } gameboy_t;

@@ -38,7 +38,7 @@ typedef enum {
 #define AND_FLAGS_SRC     ALU,   CLEAR, SET,   CLEAR
 #define OR_FLAGS_SRC      ALU,   CLEAR, CLEAR, CLEAR
 #define DAA_FLAGS_SRC     ALU,   CPU,   CLEAR, ALU
-#define ROT_FLAGS_SRC     CLEAR, CLEAR, CLEAR, ALU
+#define ROT_FLAGS_SRC     ALU,   CLEAR, CLEAR, ALU
 #define SHIFT_FLAGS_SRC   ALU,   CLEAR, CLEAR, ALU
 #define ALL_ALU_FLAGS_SRC ALU,   ALU,   ALU,   ALU
 

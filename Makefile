@@ -23,15 +23,17 @@ CFLAGS += -std=c11 -Wall -pedantic -g
 # all those libs are required on Debian, feel free to adapt it to your box
 LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 
-all:: unit-test-bit unit-test-alu unit-test-bus unit-test-memory unit-test-component unit-test-cpu
+all:: unit-test-cpu-dispatch-week08
 
 unit-test-bit : unit-test-bit.o bit.o
 unit-test-alu : unit-test-alu.o alu.o bit.o
 unit-test-bus :	unit-test-bus.o bus.o component.o bit.o memory.o
 unit-test-memory : unit-test-memory.o memory.o bus.o component.o bit.o
 unit-test-component : unit-test-component.o component.o bus.o memory.o bit.o
-unit-test-cpu: unit-test-cpu.o component.o bus.o memory.o bit.o cpu.o cpu-registers.o cpu-storage.o cpu-alu.o alu.o
-
+unit-test-cpu: unit-test-cpu.o component.o bus.o memory.o bit.o cpu.o cpu-registers.o cpu-storage.o
+unit-test-cpu-dispatch-week08 : unit-test-cpu-dispatch-week08.o alu.o \
+ bit.o bus.o memory.o component.o opcode.o cpu-alu.o cpu-storage.o \
+ cpu-registers.o gameboy.o
 
 alu.o: alu.c bit.h alu.h error.h
 bit.o: bit.c bit.h
@@ -42,7 +44,7 @@ cpu.o: cpu.c error.h opcode.h bit.h cpu.h alu.h bus.h memory.h component.h cpu-a
 cpu-registers.o: cpu-registers.c cpu-registers.h cpu.h alu.h bit.h bus.h memory.h component.h error.h
 cpu-storage.o: cpu-storage.c error.h cpu-storage.h memory.h opcode.h bit.h cpu.h alu.h bus.h component.h cpu-registers.h gameboy.h util.h
 error.o: error.c
-gameboy.o: gameboy.c gameboy.h bus.h memory.h component.h cpu.h alu.h bit.h error.h
+gameboy.o: gameboy.c gameboy.h bus.h memory.h component.h cpu.h alu.h bit.h error.h bootrom.h
 libsid_demo.o: libsid_demo.c sidlib.h
 memory.o: memory.c memory.h error.h
 opcode.o: opcode.c opcode.h bit.h
@@ -63,7 +65,7 @@ unit-test-memory.o: unit-test-memory.c tests.h error.h bus.h memory.h component.
 
 
 TARGETS := 
-CHECK_TARGETS := unit-test-bus unit-test-memory unit-test-component unit-test-cpu
+CHECK_TARGETS := unit-test-alu unit-test-cpu-dispatch-week08
 OBJS = 
 OBJS_NO_STATIC_TESTS =
 OBJS_STATIC_TESTS = 

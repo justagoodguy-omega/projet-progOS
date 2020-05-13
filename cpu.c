@@ -39,6 +39,7 @@ int cpu_init(cpu_t* cpu)
     cpu -> alu.value = 0;
     cpu -> bus = NULL;
     cpu -> idle_time = 0;
+    cpu -> write_listener = 0;
    
     return ERR_NONE;
 }
@@ -84,6 +85,9 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
 {
     M_REQUIRE_NON_NULL(lu);
     M_REQUIRE_NON_NULL(cpu);
+
+    cpu -> alu.value = 0;
+    cpu -> alu.flags = 0;
 
     switch (lu->family) {
 
@@ -223,6 +227,9 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
 
     } // switch
 
+    cpu -> idle_time = cpu -> idle_time + lu -> cycles;
+    cpu -> PC = cpu -> PC + lu -> bytes;
+
     return ERR_NONE;
 }
 
@@ -230,6 +237,15 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
 static int cpu_do_cycle(cpu_t* cpu)
 {
     M_REQUIRE_NON_NULL(cpu);
+    cpu -> write_listener = 0;
+    opcode_t next_op = cpu_read_at_idx(cpu, cpu -> PC);
+    if (next_op == 0xCB){
+        instruction_t next_instruction = instruction_prefixed[cpu_read_data_after_opcode(cpu)];
+        M_REQUIRE_NO_ERR(cpu_dispatch(&next_instruction, cpu));
+    } else {
+        instruction_t next_instruction = instruction_direct[next_op];
+        M_REQUIRE_NO_ERR(cpu_dispatch(&next_instruction, cpu));
+    }
 
     return ERR_NONE;
 }
@@ -240,10 +256,11 @@ static int cpu_do_cycle(cpu_t* cpu)
  */
 int cpu_cycle(cpu_t* cpu)
 {
-    M_REQUIRE_NON_NULL(cpu);
-    uint8_t cycles = cpu -> idle_time;
-    if(cycles != 0){
-        cpu -> idle_time = cycles - 1;
+    cpu -> idle_time = cpu -> idle_time - 1;
+    if (cpu -> idle_time == 0){
+        M_REQUIRE_NON_NULL(cpu);
+        cpu_do_cycle(cpu);
     }
+
     return ERR_NONE;
 }
