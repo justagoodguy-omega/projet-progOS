@@ -34,6 +34,24 @@ void set_flag(flags_t* flags, flag_bit_t flag)
     }
 }
 
+//===========================================HELPER=FOR=SETTING=FLAGS==================================================
+int set_flags_value(alu_output_t* result, uint16_t zero, uint8_t setH, uint8_t setC)
+{
+    M_REQUIRE_NON_NULL(result);
+
+    if (zero == 0){
+        set_Z(&(result -> flags));
+    }
+    if (setH != 0){
+        set_H(&(result -> flags));
+    }
+    if (setC != 0){
+        set_C(&(result -> flags));
+    }
+
+    return ERR_NONE;
+}
+
 //=====================================================================================================================
 /**
  * @brief adds two uint8 and writes the results and flags into an alu_output_t structure
@@ -52,16 +70,8 @@ int alu_add8(alu_output_t* result, uint8_t x, uint8_t y, bit_t c0)
     uint8_t v2 = msb4(x) + msb4(y) + msb4(v1);
     uint8_t res = merge4(v1, v2);
     (result -> value) = res;
-    (result -> flags) = 0; 
-    if (res == 0){
-        set_Z(&(result -> flags));
-    }
-    if (msb4(v1) != 0){
-        set_H(&(result -> flags));
-    }
-    if (msb4(v2) != 0){
-        set_C(&(result -> flags));
-    }
+    (result -> flags) = 0;
+    M_REQUIRE_NO_ERR(set_flags_value(result, res, msb4(v1), msb4(v2)));
 
     return ERR_NONE;
 }
@@ -85,17 +95,8 @@ int alu_sub8(alu_output_t* result, uint8_t x, uint8_t y, bit_t b0)
     uint8_t res = merge4(v1, v2);
     (result -> value) = res;
     (result -> flags) = 0;
-
-    if (res == 0){
-        set_Z(&(result -> flags));
-    }
+    M_REQUIRE_NO_ERR(set_flags_value(result, res, bit_get(v1, 5), bit_get(v2, 5)));
     set_N(&(result -> flags));
-    if (bit_get(v1, 5) == 1){
-        set_H(&(result -> flags));
-    }
-    if (bit_get(v2, 5) == 1){
-        set_C(&(result -> flags));
-    }
 
     return ERR_NONE;
 }
@@ -121,15 +122,7 @@ int alu_add16_low(alu_output_t* result, uint16_t x, uint16_t y)
     uint16_t res = merge8(v1, v2);
     (result -> value) = res;
     (result -> flags) = 0;
-    if (res == 0){
-        set_Z(&(result -> flags));
-    }
-    if (msb4(v1_low) != 0){
-        set_H(&(result -> flags));
-    }
-    if (msb4(v2_low) != 0){
-        set_C(&(result -> flags));
-    }
+    M_REQUIRE_NO_ERR(set_flags_value(result, res, msb4(v1_low), msb4(v2_low)));
 
     return ERR_NONE;
 }
@@ -147,26 +140,15 @@ int alu_add16_low(alu_output_t* result, uint16_t x, uint16_t y)
 int alu_add16_high(alu_output_t* result, uint16_t x, uint16_t y)
 {
     M_REQUIRE_NON_NULL(result);
-
-    alu_output_t low_add = {0,0};
-    alu_output_t high_add = {0,0};
-
-    M_REQUIRE_NO_ERR(alu_add8(&low_add, x & 0xFF, y & 0xFF, 0));
-    M_REQUIRE_NO_ERR(alu_add8(&high_add, x >> 8, y >> 8, get_C(low_add.flags) >> 4));
-
-    if (get_H(high_add.flags)){
-        set_H(&(result -> flags));
-    }
-    if (get_C(high_add.flags)){
-        set_C(&(result -> flags));
-    }
-
-    uint16_t res = merge8(low_add.value, high_add.value);
-    result -> value = res;
-
-    if (res == 0){
-        set_Z(&(result -> flags));
-    }
+    
+    uint16_t v1 = lsb8(x) + lsb8(y);
+    uint8_t v1_high = lsb4(x >> 8) + lsb4(y >> 8);
+    uint16_t v2 = msb8(x) + msb8(y) + msb8(v1);
+    uint8_t v2_high = msb4(x >> 8) + msb4(y >> 8) + msb4(v1_high);
+    uint16_t res = merge8(v1, v2);
+    (result -> value) = res;
+    (result -> flags) = 0;
+    M_REQUIRE_NO_ERR(set_flags_value(result, res, msb4(v1_high), msb4(v2_high)));
 
     return ERR_NONE;
 }
@@ -226,20 +208,16 @@ int alu_shift(alu_output_t* result, uint8_t x, rot_dir_t dir)
 int alu_shiftR_A(alu_output_t* result, uint8_t x)
 {
     M_REQUIRE_NON_NULL(result);
+
     (result -> flags) = 0;
     uint8_t shift_result = x;
     bit_rotate(&shift_result, RIGHT, 1);
-
-    if (bit_get(x, 0) == 1){
-        set_C(&(result -> flags));
-    }
     if (get_MSB_8(x) == 1){
         bit_set(&shift_result, MSB_INDEX_8);
     }
-    if( shift_result == 0){
-        set_Z(&(result -> flags));
-    }
+    M_REQUIRE_NO_ERR(set_flags_value(result, shift_result, 0, bit_get(x, 0)));
     result -> value = shift_result;
+
     return ERR_NONE;
 }
 
@@ -257,18 +235,15 @@ int alu_rotate(alu_output_t* result, uint8_t x, rot_dir_t dir)
     M_REQUIRE_NON_NULL(result);
     (result -> flags) = 0;
     uint8_t shift_result = x;
+    bit_t setC = 0;;
     
     switch (dir) {
 	case LEFT:
-		if (bit_get(x, MSB_INDEX_8) == 1) {
-            set_C(&(result -> flags));
-        }
+		setC = bit_get(x, MSB_INDEX_8);
         break;
 
 	case RIGHT:
-		if (bit_get(x, 0) == 1){
-            set_C(&(result -> flags));
-        }
+		setC = bit_get(x, 0);
         break;
 
     default: 
@@ -277,9 +252,8 @@ int alu_rotate(alu_output_t* result, uint8_t x, rot_dir_t dir)
     
     bit_rotate(&shift_result, dir, 1);
     result -> value = shift_result;
-    if (x == 0){
-        set_Z(&(result -> flags));
-    }
+    M_REQUIRE_NO_ERR(set_flags_value(result, x, 0, setC));
+
     return ERR_NONE;
 }
 
@@ -297,26 +271,26 @@ int alu_carry_rotate(alu_output_t* result, uint8_t x, rot_dir_t dir, flags_t fla
 {
     M_REQUIRE_NON_NULL(result);
     (result -> flags) = 0;
+    bit_t carry_out = 0;
     uint8_t shift_result = 0;
+    bit_rotate(&shift_result, dir, 1);
 
     switch (dir) {
 	case LEFT: 
-        if (bit_get(x, MSB_INDEX_8)){
-            set_C(&(result -> flags));
-        }
-        shift_result = x << 1;
+        carry_out = bit_get(x, MSB_INDEX_8);
         if (get_C(flags)){
             bit_set(&shift_result, 0);
+        } else {
+            bit_unset(&shift_result, 0);
         }
         break;
 
 	case RIGHT:
-		if (bit_get(x, 0)){
-            set_C(&(result -> flags));
-        }
-        shift_result = x >> 1;
-        if (get_C(flags)){
+		carry_out = bit_get(shift_result, MSB_INDEX_8);
+        if(get_C(flags) != 0){
             bit_set(&shift_result, MSB_INDEX_8);
+        } else {
+            bit_unset(&shift_result, MSB_INDEX_8);
         }
         break;
 
@@ -325,9 +299,7 @@ int alu_carry_rotate(alu_output_t* result, uint8_t x, rot_dir_t dir, flags_t fla
     }
 
     result -> value = shift_result;
-    if(shift_result == 0){
-        set_flag(&(result -> flags), FLAG_Z);
-    }
+    M_REQUIRE_NO_ERR(set_flags_value(result, shift_result, 0, carry_out));
 
     return ERR_NONE;
 }

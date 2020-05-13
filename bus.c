@@ -15,6 +15,7 @@
  */
 int bus_plug(bus_t bus, component_t* c, addr_t start, addr_t end)
 {
+    M_REQUIRE_NON_NULL(&bus);
     M_REQUIRE_NON_NULL(c);
     if(start >= end || start > 0xFFFF || end > 0xFFFF){
         return ERR_ADDRESS;
@@ -41,10 +42,12 @@ int bus_plug(bus_t bus, component_t* c, addr_t start, addr_t end)
  */
 int bus_forced_plug(bus_t bus, component_t* c, addr_t start, addr_t end, addr_t offset)
 {
+    M_REQUIRE_NON_NULL(&bus);
     M_REQUIRE_NON_NULL(c);
     c -> start = start;
     c -> end = end;
-    if(bus_remap(bus, c, offset) == ERR_ADDRESS){
+    int ERR = bus_remap(bus, c, offset);
+    if(ERR == ERR_ADDRESS){
         c -> start = 0;
         c -> end = 0;
         return ERR_ADDRESS;
@@ -64,6 +67,7 @@ int bus_forced_plug(bus_t bus, component_t* c, addr_t start, addr_t end, addr_t 
 int bus_remap(bus_t bus, component_t* c, addr_t offset)
 {
     M_REQUIRE_NON_NULL(c);
+    M_REQUIRE_NON_NULL(c -> mem);
     M_REQUIRE_NON_NULL(c -> mem -> memory);
     if(((c -> end) - (c -> start) + offset >= c -> mem -> size) ||
             (c -> start >  c-> end) || (c -> end > 0xFFFF)){
@@ -86,6 +90,7 @@ int bus_remap(bus_t bus, component_t* c, addr_t offset)
  */
 int bus_unplug(bus_t bus, component_t* c)
 {
+    M_REQUIRE_NON_NULL(&bus);
     M_REQUIRE_NON_NULL(c);
     for(int i = c -> start; i <= c -> end; ++i){
         bus[i] = NULL;
@@ -105,6 +110,7 @@ int bus_unplug(bus_t bus, component_t* c)
  */
 int bus_read(const bus_t bus, addr_t address, data_t* data)
 {
+    M_REQUIRE_NON_NULL(&bus);
     M_REQUIRE_NON_NULL(data);
     if(address > 0xFFFF){
         return ERR_ADDRESS;
@@ -127,6 +133,7 @@ int bus_read(const bus_t bus, addr_t address, data_t* data)
  */
 int bus_write(bus_t bus, addr_t address, data_t data)
 {
+    M_REQUIRE_NON_NULL(&bus);
     M_REQUIRE_NON_NULL(bus[address]);
     if(address > 0xFFFF){
         return ERR_ADDRESS;
@@ -146,6 +153,7 @@ int bus_write(bus_t bus, addr_t address, data_t data)
  */
 int bus_read16(const bus_t bus, addr_t address, addr_t* data16)
 {
+    M_REQUIRE_NON_NULL(&bus);
     M_REQUIRE_NON_NULL(data16);
     if(address >= 0xFFFF){
         return ERR_ADDRESS;
@@ -172,6 +180,7 @@ int bus_read16(const bus_t bus, addr_t address, addr_t* data16)
  */
 int bus_write16(bus_t bus, addr_t address, addr_t data16)
 {
+    M_REQUIRE_NON_NULL(&bus);
     M_REQUIRE_NON_NULL(bus[address]);
     if(address >= 0xFFFF){
         return ERR_ADDRESS;

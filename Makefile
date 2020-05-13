@@ -23,7 +23,11 @@ CFLAGS += -std=c11 -Wall -pedantic -g
 # all those libs are required on Debian, feel free to adapt it to your box
 LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 
+<<<<<<< HEAD
 all:: unit-test-cpu-dispatch-week08
+=======
+all:: unit-test-component
+>>>>>>> rendu1corr
 
 unit-test-bit : unit-test-bit.o bit.o
 unit-test-alu : unit-test-alu.o alu.o bit.o
@@ -36,7 +40,7 @@ unit-test-cpu-dispatch-week08 : unit-test-cpu-dispatch-week08.o alu.o \
  cpu-registers.o gameboy.o
 
 alu.o: alu.c bit.h alu.h error.h
-bit.o: bit.c bit.h
+bit.o: bit.c bit.h error.h
 bus.o: bus.c bus.h memory.h component.h error.h bit.h
 component.o: component.c component.h memory.h error.h
 cpu-alu.o: cpu-alu.c error.h bit.h alu.h cpu-alu.h opcode.h cpu.h bus.h memory.h component.h cpu-storage.h cpu-registers.h
@@ -65,7 +69,11 @@ unit-test-memory.o: unit-test-memory.c tests.h error.h bus.h memory.h component.
 
 
 TARGETS := 
+<<<<<<< HEAD
 CHECK_TARGETS := unit-test-alu unit-test-cpu-dispatch-week08
+=======
+CHECK_TARGETS := unit-test-component
+>>>>>>> rendu1corr
 OBJS = 
 OBJS_NO_STATIC_TESTS =
 OBJS_STATIC_TESTS = 

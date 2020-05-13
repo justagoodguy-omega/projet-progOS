@@ -69,7 +69,9 @@ int cpu_plug(cpu_t* cpu, bus_t* bus)
  */
 void cpu_free(cpu_t* cpu)
 {
-    cpu -> bus = NULL;
+    if (cpu != NULL){
+        cpu -> bus = NULL;
+    }
 }
 
 //=========================================================================

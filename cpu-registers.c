@@ -30,6 +30,7 @@ uint8_t cpu_reg_get(const cpu_t* cpu, reg_kind reg){
 }
 
 void cpu_reg_pair_set(cpu_t* cpu, reg_pair_kind reg, uint16_t value){
+    M_REQUIRE_NON_NULL(cpu);
     switch(reg){
         case REG_BC_CODE : cpu -> BC = value; break;
         case REG_DE_CODE : cpu -> DE = value; break;
@@ -40,6 +41,7 @@ void cpu_reg_pair_set(cpu_t* cpu, reg_pair_kind reg, uint16_t value){
 }
 
 void cpu_reg_set(cpu_t* cpu, reg_kind reg, uint8_t value){
+    M_REQUIRE_NON_NULL(cpu);
     switch(reg){
         case REG_B_CODE : cpu -> B = value; break;
         case REG_C_CODE : cpu -> C = value; break;
