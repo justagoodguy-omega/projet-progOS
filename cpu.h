@@ -82,6 +82,13 @@ typedef struct{
     register_16 PC;
     register_16 SP;
 
+    component_t high_ram;
+
+    register_8 IF;
+    register_8 IE;
+    bit_t IME;
+    bit_t HALT;
+
     addr_t write_listener;
 } cpu_t;
 

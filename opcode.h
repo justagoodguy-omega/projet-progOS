@@ -57,6 +57,15 @@ int opcode_check_integrity();
 
 // ======================================================================
 /**
+ * @brief Macro for cc values
+ */
+#define cc_NZ 0
+#define cc_Z 1
+#define cc_NC 2
+#define cc_C 3
+
+// ======================================================================
+/**
  * @brief Instruction families
  *
  */
