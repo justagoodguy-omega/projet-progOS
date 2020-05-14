@@ -8,6 +8,9 @@
 #include "cartridge.h"
 
 
+//number of cycles simulated
+uint64_t cycles = 0;
+
 // ======================================================================
 int gameboy_create(gameboy_t* gameboy, const char* filename)
 {
@@ -42,6 +45,41 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
             ECHO_RAM_END));
     gameboy -> echo_ram = *echo_ram;
     /*### END CORR ###*/
+
+     //REGISTERS
+    M_REQUIRE_NO_ERR(component_create(&(gameboy -> components[1]),
+                MEM_SIZE(REGISTERS)));
+    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, &(gameboy -> components[1]),
+                REGISTERS_START, REGISTERS_END));
+    
+    //EXTERNAL_RAM
+    M_REQUIRE_NO_ERR(component_create(&(gameboy -> components[2]),
+                MEM_SIZE(EXTERN_RAM)));
+    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, &(gameboy -> components[2]),
+                EXTERN_RAM_START, EXTERN_RAM_END));
+
+    //VIDEO_RAM
+    M_REQUIRE_NO_ERR(component_create(&(gameboy -> components[3]),
+                MEM_SIZE(VIDEO_RAM)));
+    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, &(gameboy -> components[3]),
+                VIDEO_RAM_START, VIDEO_RAM_END));
+
+    //GRAPH_RAM
+    M_REQUIRE_NO_ERR(component_create(&(gameboy -> components[4]),
+                MEM_SIZE(GRAPH_RAM)));
+    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, &(gameboy -> components[4]),
+                GRAPH_RAM_START, GRAPH_RAM_END));
+    
+    //USELESS
+    M_REQUIRE_NO_ERR(component_create(&(gameboy -> components[5]),
+                MEM_SIZE(USELESS)));
+    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, &(gameboy -> components[5]),
+                USELESS_START, USELESS_END));
+    
+
+    //CPU
+    M_REQUIRE_NO_ERR(cpu_init(&(gameboy -> cpu)));
+    M_REQUIRE_NO_ERR(cpu_plug(&(gameboy -> cpu), &(gameboy -> bus)));
 
     //TIMER
     gameboy -> timer.cpu = cpu;
@@ -105,5 +143,11 @@ int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
     M_REQUIRE_NO_ERR(cpu_cycle(&(gameboy -> cpu)));
     M_REQUIRE_NO_ERR(timer_bus_listener(&(gameboy -> timer), gameboy -> cpu.PC));
 
+    M_REQUIRE_NON_NULL(gameboy);
+    if(cycle > cycles){
+        for(; cycles < cycle; ++cycles){
+            M_REQUIRE_NO_ERR(cpu_cycle(&(gameboy -> cpu)));
+        }
+    }
     return ERR_NONE;
 }
