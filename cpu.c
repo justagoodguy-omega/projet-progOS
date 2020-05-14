@@ -229,7 +229,7 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
 
     } // switch
 
-    cpu -> idle_time = (cpu -> idle_time) + (lu -> cycles);
+    cpu -> idle_time = (lu -> cycles) - 1;
     cpu -> PC = cpu -> PC + lu -> bytes;
 
     return ERR_NONE;
