@@ -3,13 +3,15 @@
 #include "error.h"
 #include "bit.h"
 
+#define TIMA_MAX_CYCLES 0xFF
+
 // =============================== AUX ==================================
 int timer_state(gbtimer_t* timer, bit_t* res)
 {
     M_REQUIRE_NON_NULL(timer);
-    uint8_t tac;
+    uint8_t tac = 0;
     M_REQUIRE_NO_ERR(bus_read(timer -> cpu -> bus, REG_TAC, &tac));
-    uint8_t main_counter;
+    uint8_t main_counter = 0;
     M_REQUIRE_NO_ERR(bus_read(timer -> cpu -> bus, REG_DIV, &main_counter));
     *res = bit_get(tac, 2) & bit_get(main_counter, tac & 0x3);
     return ERR_NONE;
@@ -18,19 +20,19 @@ int timer_state(gbtimer_t* timer, bit_t* res)
 int timer_incr_if_state_change(gbtimer_t* timer, bit_t old_state)
 {
     M_REQUIRE_NON_NULL(timer);
-    bit_t new_state;
+    bit_t new_state = 0;
     M_REQUIRE_NO_ERR(timer_state(timer, &new_state));
-    if (old_state == 1 &  new_state == 0){
-        uint8_t secondary_counter;
+    if ((old_state == 1) && (new_state == 0)){
+        uint8_t secondary_counter = 0;
         M_REQUIRE_NO_ERR(bus_read(&(timer -> cpu -> bus), REG_TIMA,
                 &secondary_counter));
-        if (secondary_counter == 0xFF){
-            uint8_t reinit;
+        if (secondary_counter == TIMA_MAX_CYCLES){
+            uint8_t reinit = 0;
             M_REQUIRE_NO_ERR(bus_read(timer -> cpu -> bus, REG_TMA, &reinit));
             M_REQUIRE_NO_ERR(bus_write(timer -> cpu -> bus, REG_TIMA, reinit));
-            //cpu_request_interrupt(timer -> cpu, TIMER);
+            cpu_request_interrupt(timer -> cpu, TIMER);
         } else {
-            M_REQUIRE_NO_ERR(bus_write(timer -> cpu -> bus, REG_TMA,
+            M_REQUIRE_NO_ERR(bus_write(timer -> cpu -> bus, REG_TIMA,
                     secondary_counter + 1));
         }
     }

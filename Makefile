@@ -23,7 +23,7 @@ CFLAGS += -std=c11 -Wall -pedantic -g
 # all those libs are required on Debian, feel free to adapt it to your box
 LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 
-all:: unit-test-cartridge
+all:: unit-test-timer
 
 test-cpu-week08 	: test-cpu-week08.o bit.o cpu.o alu.o bus.o memory.o component.o cpu-storage.o opcode.o cpu-registers.o cpu-alu.o error.o
 unit-test-bit 		: unit-test-bit.o bit.o
@@ -37,7 +37,8 @@ unit-test-cpu-dispatch-week08 : unit-test-cpu-dispatch-week08.o alu.o \
  cpu-registers.o gameboy.o timer.o cartridge.o
 unit-test-cartridge	: unit-test-cartridge.o error.o cartridge.o component.o memory.o bus.o \
  cpu.o alu.o bit.o cpu-registers.o cpu-alu.o cpu-storage.o opcode.o
-unit-test-timer		: unit-test-timer.o util.o error.o timer.o component.o memory.o bit.o cpu.o alu.o bus.o
+unit-test-timer		: unit-test-timer.o util.o error.o timer.o component.o memory.o bit.o \
+ cpu.o alu.o bus.o cpu-registers.o cpu-storage.o cpu-alu.o opcode.o
 
 
 
@@ -102,7 +103,7 @@ unit-test-timer.o: unit-test-timer.c util.h tests.h error.h timer.h \
  component.h memory.h bit.h cpu.h alu.h bus.h
 
 TARGETS := 
-CHECK_TARGETS := unit-test-cartridge
+CHECK_TARGETS := unit-test-timer
 OBJS = 
 OBJS_NO_STATIC_TESTS =
 OBJS_STATIC_TESTS = 

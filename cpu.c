@@ -385,7 +385,7 @@ int cpu_cycle(cpu_t* cpu)
 {
     M_REQUIRE_NON_NULL(cpu);
     cpu -> write_listener = 0;
-   if(cpu -> idle_time == 0){
+    if(cpu -> idle_time == 0){
         if(cpu -> HALT){
             if (((cpu -> IF) & (cpu -> IE)) != 0){
                 cpu -> HALT = 0;
