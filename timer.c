@@ -12,26 +12,24 @@ int timer_state(gbtimer_t* timer, bit_t* res)
     M_REQUIRE_NON_NULL(timer);
     uint8_t tac = 0;
     M_REQUIRE_NO_ERR(bus_read(*(timer -> cpu -> bus), REG_TAC, &tac));
-    uint8_t index = 0;
+    bit_t counter_bit = 0;
     switch(tac & 0x3){
-        case 0:
-            index = 9;
+        case 0: // index 9
+            counter_bit = bit_get(msb8(timer -> counter), 9 - 8);
             break;
-        case 1:
-            index = 3;
+        case 1: // index 3
+            counter_bit = bit_get(lsb8(timer -> counter), 3);
             break;
-        case 2:
-            index = 5;
+        case 2: // index 5
+            counter_bit = bit_get(lsb8(timer -> counter), 5);
             break;
-        case 3:
-            index = 7;
+        case 3: // index 7
+            counter_bit = bit_get(lsb8(timer -> counter), 7);
             break;
         default:
             return ERR_BAD_PARAMETER;
     }
-    uint8_t main_counter = 0;
-    M_REQUIRE_NO_ERR(bus_read(*(timer -> cpu -> bus), REG_DIV, &main_counter));
-    *res = bit_get(tac, 2) & bit_get(main_counter, index);
+    *res = bit_get(tac, 2) & counter_bit;
     return ERR_NONE;
 }
 
