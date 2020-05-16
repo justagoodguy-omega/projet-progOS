@@ -113,8 +113,8 @@ int checkCCconditions(cpu_t* cpu, opcode_t opcode){
 
 /**
  * @brief Get the index of the interrupt to be handled
- * @param cpu the cpu handling the exception
- * @return the index of the first interrupt to handle
+ * @param cpu the cpu handling the interruption
+ * @return the index of the first interrupt to handle (or -1 if no interruption)
 */
 int find_interrupt_index(cpu_t* cpu){
     int interruptionNb = 5;
@@ -126,6 +126,32 @@ int find_interrupt_index(cpu_t* cpu){
     }
     fprintf(stderr, "Interruption index problem");
     return -1;
+}
+
+
+//=========================================================================
+/**
+ * @brief Do what needs to be done to handle a detected interruption
+ * @param cpu the cpu handling the interruption
+ */
+int handle_interruption(cpu_t* cpu){
+    M_REQUIRE_NON_NULL(cpu);
+    cpu -> IME = 0;
+    int interruptIdx = find_interrupt_index(cpu);
+    if(interruptIdx < 0){
+        return ERR_BAD_PARAMETER;
+    }
+    //putting bit i of IF to 0
+    uint8_t mask = 1 << interruptIdx;
+    mask = ~mask;
+    cpu -> IF = cpu -> IF & mask;
+    cpu_SP_push(cpu, cpu -> PC);
+
+    addr_t handlerAddr = 0x40 + 8*interruptIdx;
+    cpu -> PC = handlerAddr;
+    cpu -> idle_time += 5;
+
+    return ERR_NONE;
 }
 
 //=========================================================================
@@ -350,18 +376,7 @@ static int cpu_do_cycle(cpu_t* cpu)
 {
     M_REQUIRE_NON_NULL(cpu);
     if(cpu -> IME && (((cpu -> IF) & (cpu -> IE)) != 0)) {
-            cpu -> IME = 0;
-            int interruptIdx = find_interrupt_index(cpu);
-            uint8_t mask = 1 << interruptIdx;
-            mask = ~mask;
-            cpu -> IF = cpu -> IF & mask;
-            cpu_SP_push(cpu, cpu -> PC);
-
-            addr_t handlerAddr = 0x40 + 8*interruptIdx;
-            cpu -> PC = handlerAddr;
-            cpu -> idle_time += 5;
-
-            return ERR_NONE;
+            M_REQUIRE_NO_ERR(handle_interruption(cpu));
     }
     else {
         opcode_t next_op = cpu_read_at_idx(cpu, cpu -> PC);
@@ -372,9 +387,8 @@ static int cpu_do_cycle(cpu_t* cpu)
             instruction_t next_instruction = instruction_direct[next_op];
             M_REQUIRE_NO_ERR(cpu_dispatch(&next_instruction, cpu));
         }
-
-        return ERR_NONE;
     }
+    return ERR_NONE;
 }
 
 // ======================================================================

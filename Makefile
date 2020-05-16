@@ -23,9 +23,10 @@ CFLAGS += -std=c11 -Wall -pedantic -g
 # all those libs are required on Debian, feel free to adapt it to your box
 LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 
-all:: unit-test-cartridge
+all:: unit-test-cartridge test-cpu-week09
 
 test-cpu-week08 	: test-cpu-week08.o bit.o cpu.o alu.o bus.o memory.o component.o cpu-storage.o opcode.o cpu-registers.o cpu-alu.o error.o
+test-cpu-week09 	: test-cpu-week09.o bit.o cpu.o alu.o bus.o memory.o component.o cpu-storage.o opcode.o cpu-registers.o cpu-alu.o error.o
 unit-test-bit 		: unit-test-bit.o bit.o
 unit-test-alu 		: unit-test-alu.o alu.o bit.o
 unit-test-bus 		:	unit-test-bus.o bus.o component.o bit.o memory.o
@@ -66,6 +67,8 @@ memory.o: memory.c memory.h error.h
 opcode.o: opcode.c opcode.h bit.h
 sidlib.o: sidlib.c sidlib.h
 test-cpu-week08.o: test-cpu-week08.c opcode.h bit.h cpu.h alu.h bus.h \
+ memory.h component.h cpu-storage.h util.h error.h
+test-cpu-week09.o: test-cpu-week08.c opcode.h bit.h cpu.h alu.h bus.h \
  memory.h component.h cpu-storage.h util.h error.h
 test-gameboy.o: test-gameboy.c gameboy.h bus.h memory.h component.h cpu.h \
  alu.h bit.h timer.h cartridge.h util.h error.h
