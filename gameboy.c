@@ -17,17 +17,10 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
     M_REQUIRE_NON_NULL(gameboy);
 
     /*### CORR ###*/
-    //init components?
-    component_t* comps = calloc(GB_NB_COMPONENTS, sizeof(component_t));
-    M_REQUIRE_NON_NULL(comps);
-    cpu_t* cpu = (cpu_t*)malloc(sizeof(cpu_t));
-    M_REQUIRE_NON_NULL(cpu);
-    M_REQUIRE_NO_ERR(cpu_init(cpu));
-    bus_t bus; //how to init??
-    /*
-    gameboy -> bus = bus;
-    gameboy -> components = comps;
-    gameboy -> cpu = *cpu;*/
+    //BUS
+    for (int i = 0; i < BUS_SIZE; ++i){
+        gameboy -> bus[i] = 0;
+    }
     /*### END CORR ###*/
 
     // WORK RAM
@@ -38,7 +31,6 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
 
     // ECHO_RAM
     /*### CORR ###*/
-    // what to do with a temp component?? Stock in gameboy?
     component_t* echo_ram = (component_t*)malloc(sizeof(component_t));
     M_REQUIRE_NO_ERR(component_shared(echo_ram, &(gameboy -> components[0])));
     M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, echo_ram, ECHO_RAM_START,
@@ -75,22 +67,20 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
                 MEM_SIZE(USELESS)));
     M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, &(gameboy -> components[5]),
                 USELESS_START, USELESS_END));
-    
+    gameboy -> nb_components = GB_NB_COMPONENTS;
 
     //CPU
     M_REQUIRE_NO_ERR(cpu_init(&(gameboy -> cpu)));
     M_REQUIRE_NO_ERR(cpu_plug(&(gameboy -> cpu), &(gameboy -> bus)));
 
     //TIMER
-    gameboy -> timer.cpu = cpu;
+    gameboy -> timer.cpu = &(gameboy -> cpu);
     gameboy -> timer.counter = 0;
 
     //CARTRIDGE
-    cartridge_t* cartridge = (cartridge_t*)malloc(sizeof(cartridge_t));
-    M_REQUIRE_NO_ERR(cartridge_init(cartridge, filename));
-    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, &(cartridge -> c), BANK_ROM0_START,
+    M_REQUIRE_NO_ERR(cartridge_init(&(gameboy -> cartridge), filename));
+    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, &(gameboy -> cartridge.c), BANK_ROM0_START,
             BANK_ROM1_END));
-    gameboy -> cartridge = *cartridge;
 
     // BOOT ROM
     M_REQUIRE_NO_ERR(bootrom_init(&(gameboy -> bootrom)));
