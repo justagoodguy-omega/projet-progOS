@@ -91,11 +91,11 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
     M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, cartridge, BANK_ROM0_START,
             BANK_ROM1_END));
     gameboy -> cartridge = *cartridge;
-/*
+
     // BOOT ROM
     M_REQUIRE_NO_ERR(bootrom_init(&(gameboy -> bootrom)));
     bootrom_plug(&(gameboy -> bootrom), gameboy -> bus);
-  */  gameboy -> boot = 1;
+    gameboy -> boot = 1;
 
     return ERR_NONE;
 }
@@ -129,7 +129,10 @@ void gameboy_free(gameboy_t* gameboy)
             component_free(&(gameboy -> bootrom));
         }
         //free cartridge
-
+        if (&(gameboy -> cartridge) != NULL){
+            bus_unplug(gameboy -> bus, &(gameboy -> cartridge));
+            cartridge_free(&gameboy -> cartridge);
+        }
 
         gameboy = NULL;
     }

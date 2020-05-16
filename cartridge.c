@@ -11,12 +11,8 @@
 int cartridge_init_from_file(component_t* c, const char* filename)
 {
     M_REQUIRE_NON_NULL(c);
-    if (filename == NULL){
+    if (filename == NULL || strlen(filename) == 0){
         return ERR_BAD_PARAMETER;
-    } else {
-        if (strlen(filename) == 0){
-            return ERR_BAD_PARAMETER;
-        }
     }
     FILE* f = NULL;
     f = fopen(filename, "rb");
@@ -48,12 +44,8 @@ int cartridge_init_from_file(component_t* c, const char* filename)
 int cartridge_init(cartridge_t* ct, const char* filename)
 {
     M_REQUIRE_NON_NULL(ct);
-    if (filename == NULL){
+    if (filename == NULL || strlen(filename) == 0){
         return ERR_BAD_PARAMETER;
-    } else {
-        if (strlen(filename) == 0){
-            return ERR_BAD_PARAMETER;
-        }
     }
     component_t c;
     memset(&c, 0, sizeof(component_t));
@@ -69,7 +61,8 @@ int cartridge_plug(cartridge_t* ct, bus_t bus)
 {
     M_REQUIRE_NON_NULL(ct);
     M_REQUIRE_NON_NULL(bus);
-    M_REQUIRE_NO_ERR(bus_forced_plug(bus, &(ct -> c), BANK_ROM0_START, BANK_ROM1_END, 0));
+    M_REQUIRE_NO_ERR(bus_forced_plug(bus, &(ct -> c), BANK_ROM0_START,
+            BANK_ROM1_END, 0));
     return ERR_NONE;
 }
 

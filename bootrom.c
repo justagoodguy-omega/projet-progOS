@@ -9,7 +9,7 @@ int bootrom_init(component_t* c)
 {
     M_REQUIRE_NON_NULL(c);
     M_REQUIRE_NO_ERR(component_create(c, MEM_SIZE(BOOT_ROM)));
-    uint16_t content[MEM_SIZE(BOOT_ROM)] = GAMEBOY_BOOT_ROM_CONTENT;
+    data_t content[MEM_SIZE(BOOT_ROM)] = GAMEBOY_BOOT_ROM_CONTENT;
     for (size_t i = 0; i < MEM_SIZE(BOOT_ROM); ++i){
         *(c -> mem -> memory + i) = content[i];
     }
