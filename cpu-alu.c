@@ -142,7 +142,7 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
         M_REQUIRE_NO_ERR(alu_add8(&(cpu -> alu),
                 cpu_reg_get(cpu, extract_reg(lu -> opcode, 3)), 1, 0));
         cpu_reg_set(cpu, extract_reg(lu -> opcode, 3), cpu -> alu.value);
-        cpu_combine_alu_flags(cpu, DEC_FLAGS_SRC);
+        cpu_combine_alu_flags(cpu, INC_FLAGS_SRC);
     } break;
 
     case DEC_R8: {

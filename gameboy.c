@@ -88,7 +88,7 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
     //CARTRIDGE
     cartridge_t* cartridge = (cartridge_t*)malloc(sizeof(cartridge_t));
     M_REQUIRE_NO_ERR(cartridge_init(cartridge, filename));
-    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, cartridge, BANK_ROM0_START,
+    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, &(cartridge -> c), BANK_ROM0_START,
             BANK_ROM1_END));
     gameboy -> cartridge = *cartridge;
 
@@ -130,7 +130,7 @@ void gameboy_free(gameboy_t* gameboy)
         }
         //free cartridge
         if (&(gameboy -> cartridge) != NULL){
-            bus_unplug(gameboy -> bus, &(gameboy -> cartridge));
+            bus_unplug(gameboy -> bus, &(gameboy -> cartridge.c));
             cartridge_free(&gameboy -> cartridge);
         }
 
