@@ -7,3 +7,9 @@ unit-test-memory
 unit-test-cpu
 unit-test-cpu-dispatch-week08
 unit-test-cpu-dispatch-week09
+unit-test-cartirdge
+unit-test-timer
+test-cpu-week09
+test-cpu-week08
+dump_cpu.txt
+dump_mem.bin
