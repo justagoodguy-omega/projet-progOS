@@ -76,6 +76,7 @@ void cpu_dump(FILE* file, cpu_t* cpu)
             cpu->AF, cpu->BC,  cpu->DE, cpu->HL);
     fprintf(file, "PC: %" PRIu16 "\n", cpu->PC);
     fprintf(file, "SP: %" PRIu16 "\n", cpu->SP);
+    fprintf(file, "IME: %u, IE: %u, IF: %u, HALT: %u\n",cpu->IME, cpu->IE, cpu->IF, cpu->HALT);
 }
 
 // ======================================================================
