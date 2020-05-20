@@ -120,7 +120,7 @@ void gameboy_free(gameboy_t* gameboy)
         }
         //free cartridge
         if (&(gameboy -> cartridge) != NULL){
-            bus_unplug(gameboy -> bus, &(gameboy -> cartridge.c));
+            bus_unplug(gameboy -> bus, &(gameboy -> cartridge));
             cartridge_free(&gameboy -> cartridge);
         }
 
