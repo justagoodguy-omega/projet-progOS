@@ -23,7 +23,7 @@ CFLAGS += -std=c11 -Wall -pedantic -g
 # all those libs are required on Debian, feel free to adapt it to your box
 LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 
-all:: unit-test-timer unit-test-cpu-dispatch-week08 unit-test-cpu-dispatch-week09 test-cpu-week08 test-cpu-week09 unit-test-cartridge
+all:: unit-test-bit-vector
 
 test-cpu-week08 	: test-cpu-week08.o bit.o cpu.o alu.o bus.o memory.o component.o cpu-storage.o opcode.o cpu-registers.o cpu-alu.o error.o
 test-cpu-week09 	: test-cpu-week09.o bit.o cpu.o alu.o bus.o memory.o component.o cpu-storage.o opcode.o cpu-registers.o cpu-alu.o error.o
@@ -43,11 +43,14 @@ unit-test-cartridge	: unit-test-cartridge.o error.o cartridge.o component.o memo
  cpu.o alu.o bit.o cpu-registers.o cpu-alu.o cpu-storage.o opcode.o
 unit-test-timer		: unit-test-timer.o util.o error.o timer.o component.o memory.o bit.o \
  cpu.o alu.o bus.o cpu-registers.o cpu-storage.o cpu-alu.o opcode.o
+unit-test-bit-vector : unit-test-bit-vector.o error.o bit_vector.o image.o
 
 
 
 alu.o: alu.c bit.h alu.h error.h
 bit.o: bit.c bit.h error.h
+bit_vector.o: bit_vector.c bit_vector.h bit.h bit.c error.h
+bit_vectorCOPY.o: bit_vectorCOPY.c bit_vector.h bit.h bit.c error.h
 bootrom.o: bootrom.c bootrom.h bus.h memory.h component.h gameboy.h cpu.h \
  alu.h bit.h timer.h cartridge.h error.h
 bus.o: bus.c bus.h memory.h component.h error.h bit.h
@@ -65,13 +68,14 @@ cpu-storage.o: cpu-storage.c error.h cpu-storage.h memory.h opcode.h \
 error.o: error.c
 gameboy.o: gameboy.c gameboy.h bus.h memory.h component.h cpu.h alu.h \
  bit.h timer.h cartridge.h error.h bootrom.h
+image.o: image.c error.h image.h bit_vector.h bit.h
 libsid_demo.o: libsid_demo.c sidlib.h
 memory.o: memory.c memory.h error.h
 opcode.o: opcode.c opcode.h bit.h
 sidlib.o: sidlib.c sidlib.h
 test-cpu-week08.o: test-cpu-week08.c opcode.h bit.h cpu.h alu.h bus.h \
  memory.h component.h cpu-storage.h util.h error.h
-test-cpu-week09.o: test-cpu-week08.c opcode.h bit.h cpu.h alu.h bus.h \
+test-cpu-week09.o: test-cpu-week09.c opcode.h bit.h cpu.h alu.h bus.h \
  memory.h component.h cpu-storage.h util.h error.h
 test-gameboy.o: test-gameboy.c gameboy.h bus.h memory.h component.h cpu.h \
  alu.h bit.h timer.h cartridge.h util.h error.h
@@ -79,11 +83,12 @@ timer.o: timer.c timer.h component.h memory.h bit.h cpu.h alu.h bus.h \
  error.h
 util.o: util.c
 
-
 unit-test-alu.o: unit-test-alu.c tests.h error.h alu.h bit.h
 unit-test-alu_ext.o: unit-test-alu_ext.c tests.h error.h alu.h bit.h \
  alu_ext.h
 unit-test-bit.o: unit-test-bit.c tests.h error.h bit.h
+unit-test-bit-vector.o: unit-test-bit-vector.c tests.h error.h \
+ bit_vector.h bit.h image.h
 unit-test-bus.o: unit-test-bus.c tests.h error.h bus.h memory.h \
  component.h util.h
 unit-test-cartridge.o: unit-test-cartridge.c tests.h error.h cartridge.h \
@@ -107,6 +112,9 @@ unit-test-memory.o: unit-test-memory.c tests.h error.h bus.h memory.h \
  component.h
 unit-test-timer.o: unit-test-timer.c util.h tests.h error.h timer.h \
  component.h memory.h bit.h cpu.h alu.h bus.h
+
+util.o: util.c
+
 
 TARGETS := test-cpu-week08 test-cpu-week09
 CHECK_TARGETS := unit-test-timer unit-test-cpu-dispatch-week08 unit-test-cpu-dispatch-week09 unit-test-cartridge

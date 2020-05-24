@@ -19,12 +19,13 @@ extern "C" {
 
 //=========================================================================
 /**
- * @brief Type to represent image lines
+ * @brief Flexible array member to represent the bit_vectors, 
+ * size is the number of bits actually used
  */
 typedef struct
 {
-    size_t nb_chunks;
-    uint32_t chunks[1];
+    size_t size;
+    uint32_t content[1];
 } bit_vector_t;
 
 //=========================================================================
