@@ -16,6 +16,8 @@
 #include "cpu.h"
 #include "timer.h"
 #include "cartridge.h"
+#include "lcdc.h"
+#include "joypad.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,14 +31,17 @@ extern "C" {
  */
 typedef struct {
     bus_t bus;
-    component_t components[GB_NB_COMPONENTS];
-    size_t nb_components;
-    component_t echo_ram;
-    component_t bootrom;
-    bit_t boot;
+    cpu_t cpu;
+    uint64_t cycle; // ### CONTROLER D'OU CA VIENT ###
     gbtimer_t timer;
     cartridge_t cartridge;
-    cpu_t cpu;
+    component_t components[GB_NB_COMPONENTS];
+    size_t nb_components;
+    component_t bootrom;
+    bit_t boot;
+    lcdc_t screen;
+    joypad_t pad;
+    component_t echo_ram; //pas nécessaire?
 } gameboy_t;
 
 // Number of Game Boy cycles per second (= 2^20)

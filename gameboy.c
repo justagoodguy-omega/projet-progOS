@@ -16,12 +16,23 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
 {
     M_REQUIRE_NON_NULL(gameboy);
 
-    /*### CORR ###*/
     //BUS
     for (int i = 0; i < BUS_SIZE; ++i){
         gameboy -> bus[i] = 0;
     }
-    /*### END CORR ###*/
+
+    //CPU
+    M_REQUIRE_NO_ERR(cpu_init(&(gameboy -> cpu)));
+    M_REQUIRE_NO_ERR(cpu_plug(&(gameboy -> cpu), &(gameboy -> bus)));
+
+    //TIMER
+    gameboy -> timer.cpu = &(gameboy -> cpu);
+    gameboy -> timer.counter = 0;
+
+    //CARTRIDGE
+    M_REQUIRE_NO_ERR(cartridge_init(&(gameboy -> cartridge), filename));
+    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, &(gameboy -> cartridge.c), BANK_ROM0_START,
+            BANK_ROM1_END));
 
     // WORK RAM
     M_REQUIRE_NO_ERR(component_create(&(gameboy -> components[0]),
@@ -30,13 +41,11 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
                 WORK_RAM_START, WORK_RAM_END));
 
     // ECHO_RAM
-    /*### CORR ###*/
     component_t* echo_ram = (component_t*)malloc(sizeof(component_t));
     M_REQUIRE_NO_ERR(component_shared(echo_ram, &(gameboy -> components[0])));
     M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, echo_ram, ECHO_RAM_START,
             ECHO_RAM_END));
     gameboy -> echo_ram = *echo_ram;
-    /*### END CORR ###*/
 
      //REGISTERS
     M_REQUIRE_NO_ERR(component_create(&(gameboy -> components[1]),
@@ -69,23 +78,17 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
                 USELESS_START, USELESS_END));
     gameboy -> nb_components = GB_NB_COMPONENTS;
 
-    //CPU
-    M_REQUIRE_NO_ERR(cpu_init(&(gameboy -> cpu)));
-    M_REQUIRE_NO_ERR(cpu_plug(&(gameboy -> cpu), &(gameboy -> bus)));
-
-    //TIMER
-    gameboy -> timer.cpu = &(gameboy -> cpu);
-    gameboy -> timer.counter = 0;
-
-    //CARTRIDGE
-    M_REQUIRE_NO_ERR(cartridge_init(&(gameboy -> cartridge), filename));
-    M_REQUIRE_NO_ERR(bus_plug(gameboy -> bus, &(gameboy -> cartridge.c), BANK_ROM0_START,
-            BANK_ROM1_END));
-
     // BOOT ROM
     M_REQUIRE_NO_ERR(bootrom_init(&(gameboy -> bootrom)));
     bootrom_plug(&(gameboy -> bootrom), gameboy -> bus);
     gameboy -> boot = 1;
+
+    // SCREEN
+    M_REQUIRE_NO_ERR(lcdc_init(&(gameboy -> screen)));
+    M_REQUIRE_NO_ERR(lcdc_plug(&(gameboy -> screen), gameboy -> bus));
+
+    // JOYPAD
+    M_REQUIRE_NO_ERR(joypad_init_and_plug(&(gameboy -> pad), &(gameboy -> cpu)));
 
     return ERR_NONE;
 }
@@ -123,6 +126,11 @@ void gameboy_free(gameboy_t* gameboy)
             bus_unplug(gameboy -> bus, &(gameboy -> cartridge));
             cartridge_free(&gameboy -> cartridge);
         }
+        //free screen
+        lcdc_free(&(gameboy -> screen));
+        // lcdc unplug ??
+
+        //free pad??
 
         gameboy = NULL;
     }
