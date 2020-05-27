@@ -29,10 +29,10 @@ extern "C" {
  * @brief Game Boy data structure.
  *        Regroups everything needed to simulate the Game Boy.
  */
-typedef struct {
+struct gameboy_ {
     bus_t bus;
     cpu_t cpu;
-    uint64_t cycle; // ### CONTROLER D'OU CA VIENT ###
+    uint64_t cycles;
     gbtimer_t timer;
     cartridge_t cartridge;
     component_t components[GB_NB_COMPONENTS];
@@ -42,7 +42,9 @@ typedef struct {
     lcdc_t screen;
     joypad_t pad;
     component_t echo_ram; //pas nécessaire?
-} gameboy_t;
+};
+
+typedef gameboy_t gameboy_;
 
 // Number of Game Boy cycles per second (= 2^20)
 #define GB_CYCLES_PER_S  (((uint64_t) 1) << 20)

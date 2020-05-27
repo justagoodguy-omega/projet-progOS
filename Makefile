@@ -7,7 +7,7 @@ GTK_LIBS := `pkg-config --libs gtk+-3.0`
 
 .PHONY: clean new style feedback submit1 submit2 submit
 
-CFLAGS += -std=c11 -Wall -pedantic -g
+CFLAGS += -std=c11 -Wall -pedantic -g -D_DEFAULT_SOURCE
 
 # a bit more checks if you'd like to (uncomment
 # CFLAGS += -Wextra -Wfloat-equal -Wshadow                         \
@@ -23,7 +23,7 @@ CFLAGS += -std=c11 -Wall -pedantic -g
 # all those libs are required on Debian, feel free to adapt it to your box
 LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 
-all:: unit-test-bit-vector
+all:: gbsimulator
 
 test-cpu-week08 	: test-cpu-week08.o bit.o cpu.o alu.o bus.o memory.o component.o cpu-storage.o opcode.o cpu-registers.o cpu-alu.o error.o
 test-cpu-week09 	: test-cpu-week09.o bit.o cpu.o alu.o bus.o memory.o component.o cpu-storage.o opcode.o cpu-registers.o cpu-alu.o error.o
@@ -43,16 +43,19 @@ unit-test-cartridge	: unit-test-cartridge.o error.o cartridge.o component.o memo
  cpu.o alu.o bit.o cpu-registers.o cpu-alu.o cpu-storage.o opcode.o
 unit-test-timer		: unit-test-timer.o util.o error.o timer.o component.o memory.o bit.o \
  cpu.o alu.o bus.o cpu-registers.o cpu-storage.o cpu-alu.o opcode.o
-unit-test-bit-vector : unit-test-bit-vector.o error.o bit_vector.o image.o
-
+unit-test-bit-vector: unit-test-bit-vector.o error.o bit_vector.o image.o
+gbsimulator: CFLAGS += $(GTK_INCLUDE)
+gbsimulator: LDFLAGS += -L.
+gbsimulator: LDLIBS += -lcs212gbfinalext
+gbsimulator			: gbsimulator.o sidlib.o gameboy.o error.o
 
 
 alu.o: alu.c bit.h alu.h error.h
 bit.o: bit.c bit.h error.h
 bit_vector.o: bit_vector.c bit_vector.h bit.h bit.c error.h
-bit_vectorCOPY.o: bit_vectorCOPY.c bit_vector.h bit.h bit.c error.h
 bootrom.o: bootrom.c bootrom.h bus.h memory.h component.h gameboy.h cpu.h \
- alu.h bit.h timer.h cartridge.h error.h
+ alu.h bit.h timer.h cartridge.h lcdc.h image.h bit_vector.h joypad.h \
+ error.h
 bus.o: bus.c bus.h memory.h component.h error.h bit.h
 cartridge.o: cartridge.c component.h memory.h bus.h error.h cartridge.h
 component.o: component.c component.h memory.h error.h
@@ -64,25 +67,31 @@ cpu-registers.o: cpu-registers.c cpu-registers.h cpu.h alu.h bit.h bus.h \
  memory.h component.h error.h
 cpu-storage.o: cpu-storage.c error.h cpu-storage.h memory.h opcode.h \
  bit.h cpu.h alu.h bus.h component.h cpu-registers.h gameboy.h timer.h \
- cartridge.h util.h
+ cartridge.h lcdc.h image.h bit_vector.h joypad.h util.h
 error.o: error.c
 gameboy.o: gameboy.c gameboy.h bus.h memory.h component.h cpu.h alu.h \
- bit.h timer.h cartridge.h error.h bootrom.h
+ bit.h timer.h cartridge.h lcdc.h image.h bit_vector.h joypad.h error.h \
+ bootrom.h
+gbsimulator.o: gbsimulator.c sidlib.h lcdc.h cpu.h alu.h bit.h bus.h \
+ memory.h component.h image.h bit_vector.h gameboy.h timer.h cartridge.h \
+ joypad.h error.h
 image.o: image.c error.h image.h bit_vector.h bit.h
 libsid_demo.o: libsid_demo.c sidlib.h
 memory.o: memory.c memory.h error.h
 opcode.o: opcode.c opcode.h bit.h
 sidlib.o: sidlib.c sidlib.h
+timer.o: timer.c timer.h component.h memory.h bit.h cpu.h alu.h bus.h \
+ error.h
+util.o: util.c
+
+
 test-cpu-week08.o: test-cpu-week08.c opcode.h bit.h cpu.h alu.h bus.h \
  memory.h component.h cpu-storage.h util.h error.h
 test-cpu-week09.o: test-cpu-week09.c opcode.h bit.h cpu.h alu.h bus.h \
  memory.h component.h cpu-storage.h util.h error.h
 test-gameboy.o: test-gameboy.c gameboy.h bus.h memory.h component.h cpu.h \
- alu.h bit.h timer.h cartridge.h util.h error.h
-timer.o: timer.c timer.h component.h memory.h bit.h cpu.h alu.h bus.h \
- error.h
-util.o: util.c
-
+ alu.h bit.h timer.h cartridge.h lcdc.h image.h bit_vector.h joypad.h \
+ util.h error.h
 unit-test-alu.o: unit-test-alu.c tests.h error.h alu.h bit.h
 unit-test-alu_ext.o: unit-test-alu_ext.c tests.h error.h alu.h bit.h \
  alu_ext.h
@@ -103,8 +112,8 @@ unit-test-cpu-dispatch.o: unit-test-cpu-dispatch.c tests.h error.h alu.h \
  unit-test-cpu-dispatch.h cpu.c cpu-alu.h cpu-registers.h cpu-storage.h
 unit-test-cpu-dispatch-week08.o: unit-test-cpu-dispatch-week08.c tests.h \
  error.h alu.h bit.h cpu.h bus.h memory.h component.h opcode.h gameboy.h \
- timer.h cartridge.h util.h unit-test-cpu-dispatch.h cpu.c cpu-alu.h \
- cpu-registers.h cpu-storage.h
+ timer.h cartridge.h lcdc.h image.h bit_vector.h joypad.h util.h \
+ unit-test-cpu-dispatch.h cpu.c cpu-alu.h cpu-registers.h cpu-storage.h
 unit-test-cpu-dispatch-week09.o: unit-test-cpu-dispatch-week09.c tests.h \
  error.h alu.h bit.h cpu.h bus.h memory.h component.h opcode.h util.h \
  unit-test-cpu-dispatch.h cpu.c cpu-alu.h cpu-registers.h cpu-storage.h
@@ -113,11 +122,11 @@ unit-test-memory.o: unit-test-memory.c tests.h error.h bus.h memory.h \
 unit-test-timer.o: unit-test-timer.c util.h tests.h error.h timer.h \
  component.h memory.h bit.h cpu.h alu.h bus.h
 
-util.o: util.c
 
 
-TARGETS := test-cpu-week08 test-cpu-week09
-CHECK_TARGETS := unit-test-timer unit-test-cpu-dispatch-week08 unit-test-cpu-dispatch-week09 unit-test-cartridge
+
+TARGETS := gbsimulator
+CHECK_TARGETS := 
 OBJS = 
 OBJS_NO_STATIC_TESTS =
 OBJS_STATIC_TESTS = 

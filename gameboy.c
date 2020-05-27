@@ -8,9 +8,6 @@
 #include "cartridge.h"
 
 
-//number of cycles simulated
-uint64_t cycles = 0;
-
 // ======================================================================
 int gameboy_create(gameboy_t* gameboy, const char* filename)
 {
@@ -24,6 +21,9 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
     //CPU
     M_REQUIRE_NO_ERR(cpu_init(&(gameboy -> cpu)));
     M_REQUIRE_NO_ERR(cpu_plug(&(gameboy -> cpu), &(gameboy -> bus)));
+
+    //CYCLES
+    gameboy -> cycles = 0;
 
     //TIMER
     gameboy -> timer.cpu = &(gameboy -> cpu);
@@ -84,7 +84,7 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
     gameboy -> boot = 1;
 
     // SCREEN
-    M_REQUIRE_NO_ERR(lcdc_init(&(gameboy -> screen)));
+    M_REQUIRE_NO_ERR(lcdc_init(gameboy));
     M_REQUIRE_NO_ERR(lcdc_plug(&(gameboy -> screen), gameboy -> bus));
 
     // JOYPAD
@@ -97,7 +97,6 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
 void gameboy_free(gameboy_t* gameboy)
 {
     if (gameboy != NULL){
-        /*### CORR ###*/
         for (int i = 0; i < gameboy -> nb_components; ++i){
             if (&(gameboy -> components[i]) != NULL){
                 bus_unplug(gameboy -> bus, &(gameboy -> components[i]));
@@ -114,7 +113,6 @@ void gameboy_free(gameboy_t* gameboy)
             cpu_free(&(gameboy -> cpu));
         }
         // what to do with bus??
-        /*### END CORR ###*/
 
         //free bootrom
         if(&(gameboy -> bootrom) != NULL){
@@ -123,7 +121,7 @@ void gameboy_free(gameboy_t* gameboy)
         }
         //free cartridge
         if (&(gameboy -> cartridge) != NULL){
-            bus_unplug(gameboy -> bus, &(gameboy -> cartridge));
+            bus_unplug(gameboy -> bus, &(gameboy -> cartridge.c));
             cartridge_free(&gameboy -> cartridge);
         }
         //free screen
@@ -145,8 +143,8 @@ int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
     M_REQUIRE_NO_ERR(timer_bus_listener(&(gameboy -> timer), gameboy -> cpu.PC));
 
     M_REQUIRE_NON_NULL(gameboy);
-    if(cycle > cycles){
-        for(; cycles < cycle; ++cycles){
+    if(cycle > gameboy -> cycles){
+        for(; gameboy -> cycles < cycle; ++(gameboy -> cycles)){
             M_REQUIRE_NO_ERR(cpu_cycle(&(gameboy -> cpu)));
         }
     }

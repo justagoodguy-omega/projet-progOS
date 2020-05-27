@@ -1,4 +1,4 @@
-//#include "sidlib.h"
+#include "sidlib.h"
 #include "lcdc.h"
 #include "gameboy.h"
 #include "error.h"
@@ -18,9 +18,9 @@ struct timeval paused;
 #define MY_KEY_RIGHT_BIT  0x04
 #define MY_KEY_LEFT_BIT   0x08
 #define MY_KEY_A_BIT      0x10
-#define MY_KEY_B_BIT      0x
-#define MY_KEY_SELECT_BIT 0x
-#define MY_KEY_START_BIT  0x
+#define MY_KEY_B_BIT      0x20
+#define MY_KEY_SELECT_BIT 0x40
+#define MY_KEY_START_BIT  0x80
 
 // ======================================================================
 static void set_grey(guchar* pixels, int row, int col, int width, guchar grey)
@@ -52,15 +52,20 @@ static uint64_t get_time_in_GB_cycles_since(struct timeval* from)
 // ======================================================================
 static void generate_image(guchar* pixels, int height, int width)
 {
-    M_REQUIRE_NO_ERR(gameboy_run_until(&gameboy,
-            get_time_in_GB_cycles_since(&start)));
+    int err = 0;
+    err = gameboy_run_until(&gameboy,
+            get_time_in_GB_cycles_since(&start));
+    if (err == 0){
+        fprintf(stderr, "error running gameboy!\n");
+        return;
+    }
     for (size_t y = 0; y < height; ++y){
         for (size_t x = 0; x < width; ++x){
             uint8_t pixel = 0;
-            int err = image_get_pixel(pixel, &(gameboy.screen.display),
+            err = image_get_pixel(pixel, &(gameboy.screen.display),
                     x, y); // changer facteur?
             if (err == 0){
-            fprintf(stderr, "error generatin image!\n");
+            fprintf(stderr, "error generating image!\n");
             return;
             }
             set_grey(pixels, x, y, width, 255 - 85 * pixel);
@@ -201,7 +206,7 @@ int main(int argc, char *argv[])
 
     char cr_name[25];
     printf("Cartridge name (max length 25):\n");
-    int err = 0;
+    err = 0;
     while (err == 0){
         err = fgets(cr_name, 25, stdin);
         if (err == 0){
