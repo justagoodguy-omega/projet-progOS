@@ -23,7 +23,7 @@ CFLAGS += -std=c11 -Wall -pedantic -g -D_DEFAULT_SOURCE
 # all those libs are required on Debian, feel free to adapt it to your box
 LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 
-all:: gbsimulator
+all:: unit-test-bit-vector
 
 test-cpu-week08 	: test-cpu-week08.o bit.o cpu.o alu.o bus.o memory.o component.o cpu-storage.o opcode.o cpu-registers.o cpu-alu.o error.o
 test-cpu-week09 	: test-cpu-week09.o bit.o cpu.o alu.o bus.o memory.o component.o cpu-storage.o opcode.o cpu-registers.o cpu-alu.o error.o

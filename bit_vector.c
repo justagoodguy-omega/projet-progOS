@@ -60,11 +60,11 @@ bit_vector_t* bit_vector_create(size_t size, bit_t value) {
         return NULL;
     }
     size_t nb_chunks = forced_size(size);
-    const size_t N_MAX = (SIZE_MAX - sizeof(bit_vector_t)) / sizeof(uint32_t) + 1; 
+    const size_t N_MAX = (SIZE_MAX - sizeof(bit_vector_t)) / CHUNK_SIZE + 1; 
     if (nb_chunks <= N_MAX) {
         size_t nb_extra_chunks = nb_chunks - 1;
         
-        bit_vector_t* vector = malloc(sizeof(bit_vector_t) + (nb_extra_chunks) * sizeof(uint32_t));
+        bit_vector_t* vector = malloc(sizeof(bit_vector_t) + (nb_extra_chunks) * CHUNK_SIZE);
 
         if(vector != NULL) {
             vector -> size = size;
@@ -193,7 +193,7 @@ bit_vector_t* bit_vector_xor(bit_vector_t* pbv1, const bit_vector_t* pbv2)
 bit_vector_t* bit_vector_extract_zero_ext(const bit_vector_t* pbv, int64_t index, size_t size)
 {
     if(pbv == NULL){
-        return NULL;
+        return bit_vector_create(size, 0);
     }
     bit_vector_t* extracted = bit_vector_create(size, 0);
     if (extracted != NULL){
@@ -238,7 +238,12 @@ bit_vector_t* bit_vector_extract_wrap_ext(const bit_vector_t* pbv, int64_t index
 //=========================================================================
 bit_vector_t* bit_vector_shift(const bit_vector_t* pbv, int64_t shift)
 {
-    return bit_vector_extract_zero_ext(pbv, -shift, pbv -> size);
+    if(pbv != NULL){
+        return bit_vector_extract_zero_ext(pbv, -shift, pbv -> size);
+    }
+    else{
+        return NULL;
+    }
 }
 
 //=========================================================================
