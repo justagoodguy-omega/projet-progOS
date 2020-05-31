@@ -40,6 +40,8 @@ int cpu_init(cpu_t* cpu)
     cpu -> bus = NULL;
     cpu -> idle_time = 0;
     cpu -> write_listener = 0;
+
+    M_REQUIRE_NO_ERR(component_create(&(cpu -> high_ram), HIGH_RAM_SIZE));
    
     return ERR_NONE;
 }

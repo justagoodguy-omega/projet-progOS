@@ -23,7 +23,7 @@ CFLAGS += -std=c11 -Wall -pedantic -g -D_DEFAULT_SOURCE
 # all those libs are required on Debian, feel free to adapt it to your box
 LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 
-all:: unit-test-bit-vector
+all:: test-cpu-week09 unit-test-cpu-dispatch-week09
 
 test-cpu-week08 	: test-cpu-week08.o bit.o cpu.o alu.o bus.o memory.o component.o cpu-storage.o opcode.o cpu-registers.o cpu-alu.o error.o
 test-cpu-week09 	: test-cpu-week09.o bit.o cpu.o alu.o bus.o memory.o component.o cpu-storage.o opcode.o cpu-registers.o cpu-alu.o error.o
@@ -71,7 +71,7 @@ cpu-storage.o: cpu-storage.c error.h cpu-storage.h memory.h opcode.h \
 error.o: error.c
 gameboy.o: gameboy.c gameboy.h bus.h memory.h component.h cpu.h alu.h \
  bit.h timer.h cartridge.h lcdc.h image.h bit_vector.h joypad.h error.h \
- bootrom.h
+ bootrom.h lcdc.h
 gbsimulator.o: gbsimulator.c sidlib.h lcdc.h cpu.h alu.h bit.h bus.h \
  memory.h component.h image.h bit_vector.h gameboy.h timer.h cartridge.h \
  joypad.h error.h
@@ -125,8 +125,8 @@ unit-test-timer.o: unit-test-timer.c util.h tests.h error.h timer.h \
 
 
 
-TARGETS := gbsimulator
-CHECK_TARGETS := 
+TARGETS := test-cpu-week09
+CHECK_TARGETS := unit-test-cpu-dispatch-week09
 OBJS = 
 OBJS_NO_STATIC_TESTS =
 OBJS_STATIC_TESTS = 

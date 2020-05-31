@@ -25,6 +25,7 @@ const opcode_t instructions[] = {
     0xCD, 0x0A, 0x00, // CALL $000A
     0x76,             // HALT
     0x00,             // NOP
+    
     0xFE, 0x02,       // CP A, 2
     0xD8,             // RET C
     0xC5,             // PUSH BC
@@ -139,7 +140,7 @@ int main(int argc, char *argv[])
             cycles = (uint8_t) (instruction_direct[code].cycles + instruction_direct[code].xtra_cycles);
         }
         printf(": 0x%02" PRIX8 " (%" PRIu8 " cycle(s))\n", code, cycles);
-        if ((cpu.idle_time == 0) && (code == 0)) { // On (real) NOP: print CPU status
+        if ((cpu.idle_time == 0) /*&& (code == 0)*/) { // On (real) NOP: print CPU status
             cpu_dump(stdout, &cpu);
             if (err != ERR_NONE) {
                 printf(" ==> But got ERROR \"%s\"\n", ERR_MESSAGES[err]);

@@ -214,7 +214,7 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
     // All the others are handled elsewhere by provided library
     default:
         // uncomment this line if you have the cs212gbcpuext library
-        // M_EXIT_IF_ERR(cpu_dispatch_alu_ext(lu, cpu));
+        //M_EXIT_IF_ERR(cpu_dispatch_alu_ext(lu, cpu));
         break;
     } // switch
 
