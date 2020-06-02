@@ -135,32 +135,33 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
     case INC_HLR: {
         M_REQUIRE_NO_ERR(alu_add8(&(cpu -> alu), cpu_read_at_HL(cpu), 1, 0));
         cpu_write_at_HL(cpu, cpu -> alu.value);
-        cpu_combine_alu_flags(cpu, INC_FLAGS_SRC);
+        M_REQUIRE_NO_ERR(cpu_combine_alu_flags(cpu, INC_FLAGS_SRC)); // ### CORR: error prop
     } break;
 
     case INC_R8: {
         M_REQUIRE_NO_ERR(alu_add8(&(cpu -> alu),
                 cpu_reg_get(cpu, extract_reg(lu -> opcode, 3)), 1, 0));
         cpu_reg_set(cpu, extract_reg(lu -> opcode, 3), cpu -> alu.value);
-        cpu_combine_alu_flags(cpu, INC_FLAGS_SRC);
+        M_REQUIRE_NO_ERR(cpu_combine_alu_flags(cpu, INC_FLAGS_SRC)); // ### CORR: error prop
     } break;
 
     case DEC_R8: {
         M_REQUIRE_NO_ERR(alu_sub8(&(cpu -> alu),
                 cpu_reg_get(cpu, extract_reg(lu -> opcode, 3)), 1, 0));
         cpu_reg_set(cpu, extract_reg(lu -> opcode, 3), cpu -> alu.value);
-        cpu_combine_alu_flags(cpu, INC_FLAGS_SRC);
+        M_REQUIRE_NO_ERR(cpu_combine_alu_flags(cpu, DEC_FLAGS_SRC)); // ### CORR: error prop
     } break;
 
     case ADD_HL_R16SP: {
         M_REQUIRE_NO_ERR(alu_add16_high(&(cpu -> alu), cpu_HL_get(cpu),
                 cpu_reg_pair_SP_get(cpu, extract_reg_pair(lu -> opcode))));
         cpu_HL_set(cpu, cpu -> alu.value);
-        cpu_combine_alu_flags(cpu, CPU, CLEAR, ALU, ALU);
+        // ### CORR: error prop, flags
+        M_REQUIRE_NO_ERR(cpu_combine_alu_flags(cpu, CPU, CLEAR, ALU, ALU));
     } break;
 
     case INC_R16SP: {
-        M_REQUIRE_NO_ERR(alu_add16_low(&(cpu -> alu), 1,
+        M_REQUIRE_NO_ERR(alu_add16_high(&(cpu -> alu), 1, // ### CORR: call to high instead of low
                 cpu_reg_pair_SP_get(cpu, extract_reg_pair(lu -> opcode))));
         cpu_reg_pair_SP_set(cpu, extract_reg_pair(lu -> opcode), cpu -> alu.value);
     } break;
@@ -170,7 +171,7 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
     case CP_A_R8: {
         M_REQUIRE_NO_ERR(alu_sub8(&(cpu -> alu), cpu_reg_get(cpu, REG_A_CODE), 
                 cpu_reg_get(cpu, extract_reg(lu -> opcode, 0)), 0));
-        cpu_combine_alu_flags(cpu, SUB_FLAGS_SRC);
+        M_REQUIRE_NO_ERR(cpu_combine_alu_flags(cpu, SUB_FLAGS_SRC)); // ### CORR: error prop
     } break;
 
     case CP_A_N8: {
@@ -185,7 +186,7 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
         M_REQUIRE_NO_ERR(alu_shift(&(cpu -> alu),
                 cpu_reg_get(cpu, extract_reg(lu -> opcode, 0)), LEFT));
         cpu_reg_set(cpu, extract_reg(lu -> opcode, 0), cpu -> alu.value);
-        cpu_combine_alu_flags(cpu, SHIFT_FLAGS_SRC);
+        M_REQUIRE_NO_ERR(cpu_combine_alu_flags(cpu, SHIFT_FLAGS_SRC)); // ### CORR: error prop
     } break;
 
     case ROT_R8: {
@@ -193,7 +194,7 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
                 cpu_reg_get(cpu, extract_reg(lu -> opcode, 0)), 
                 extract_rot_dir(lu -> opcode), cpu -> F));
         cpu_reg_set(cpu, extract_reg(lu -> opcode, 0), cpu -> alu.value);
-        cpu_combine_alu_flags(cpu, ROT_FLAGS_SRC);
+        M_REQUIRE_NO_ERR(cpu_combine_alu_flags(cpu, ROT_FLAGS_SRC)); // ### CORR: error prop
     } break;
 
 
@@ -201,7 +202,7 @@ int cpu_dispatch_alu(const instruction_t* lu, cpu_t* cpu)
     case BIT_U3_R8: {
         M_REQUIRE_NO_ERR(alu_add8(&(cpu -> alu), bit_get(cpu_reg_get(
                 cpu, extract_reg(lu -> opcode, 0)), extract_n3(lu -> opcode)), 0, 0));
-        cpu_combine_alu_flags(cpu, ALU, CLEAR, SET, CPU);
+        M_REQUIRE_NO_ERR(cpu_combine_alu_flags(cpu, ALU, CLEAR, SET, CPU)); // ### CORR: error prop
     } break;
 
     case CHG_U3_R8: {

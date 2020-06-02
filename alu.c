@@ -29,8 +29,11 @@ flag_bit_t get_flag(flags_t flags, flag_bit_t flag)
  */
 void set_flag(flags_t* flags, flag_bit_t flag)
 {
-    if (flag == FLAG_Z || flag == FLAG_N || flag == FLAG_H || flag == FLAG_C){
-        *flags = *flags | flag;
+    // ### CORR: added condition on null
+    if (flags != NULL){
+        if (flag == FLAG_Z || flag == FLAG_N || flag == FLAG_H || flag == FLAG_C){
+            *flags = *flags | flag;
+        }
     }
 }
 

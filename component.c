@@ -26,7 +26,7 @@ int component_create(component_t* c, size_t mem_size)
         M_EXIT_IF_NULL(c -> mem = (memory_t*)malloc(sizeof(memory_t)), sizeof(memory_t));
         int ERR = mem_create(c -> mem, mem_size);
         if (ERR != ERR_NONE){
-            mem_free(c -> mem);
+            free(c -> mem); // ### CORR: now calling free instead of mem_free
             return ERR;
         }
     }

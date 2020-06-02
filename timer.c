@@ -3,8 +3,14 @@
 #include "error.h"
 #include "bit.h"
 #include "bus.h"
+#include "gameboy.h"
 
 #define TIMA_MAX_CYCLES 0xFF
+// ### CORR: added macro for reading/writing register
+#define READ_REG(X,Y) \
+    M_REQUIRE_NO_ERR(bus_read(*(timer -> cpu -> bus), REG_ ## X, Y));
+#define WRITE_REG(X,Y) \
+    M_REQUIRE_NO_ERR(bus_write(*(timer -> cpu -> bus), REG_ ## X, Y));
 
 // =============================== AUX ==================================
 int timer_state(gbtimer_t* timer, bit_t* res)
@@ -40,14 +46,12 @@ int timer_incr_if_state_change(gbtimer_t* timer, bit_t old_state)
     M_REQUIRE_NO_ERR(timer_state(timer, &new_state));
     if ((old_state == 1) && (new_state == 0)){
         uint8_t secondary_counter = 0;
-        M_REQUIRE_NO_ERR(bus_read(*(timer -> cpu -> bus), REG_TIMA,
-                &secondary_counter));
-        M_REQUIRE_NO_ERR(bus_write(*(timer -> cpu -> bus), REG_TIMA,
-                secondary_counter + 1));
-        if (secondary_counter >= TIMA_MAX_CYCLES){
+        READ_REG(TIMA,&secondary_counter); // ### CORR: use of macro
+        WRITE_REG(TIMA,secondary_counter + 1);
+        if (secondary_counter == TIMA_MAX_CYCLES){ // ### CORR: removed greater than
             uint8_t reinit = 0;
-            M_REQUIRE_NO_ERR(bus_read(*(timer -> cpu -> bus), REG_TMA, &reinit));
-            M_REQUIRE_NO_ERR(bus_write(*(timer -> cpu -> bus), REG_TIMA, reinit));
+            READ_REG(TMA,&reinit); // ### CORR: use of macro
+            WRITE_REG(TIMA,reinit);
             cpu_request_interrupt(timer -> cpu, TIMER);
         }
     }
@@ -67,11 +71,11 @@ int timer_init(gbtimer_t* timer, cpu_t* cpu)
 // ======================================================================
 int timer_cycle(gbtimer_t* timer)
 {
+    M_REQUIRE_NON_NULL(timer); // ### CORR: null check
     bit_t old_state;
     M_REQUIRE_NO_ERR(timer_state(timer, &old_state));
-    timer -> counter = timer -> counter + 4;
-    M_REQUIRE_NO_ERR(bus_write(*(timer -> cpu -> bus), REG_DIV,
-            msb8(timer -> counter)));
+    timer -> counter = timer -> counter + GB_TICS_PER_CYCLE; // ### CORR: use of macro
+    WRITE_REG(DIV,msb8(timer -> counter));
     M_REQUIRE_NO_ERR(timer_incr_if_state_change(timer, old_state));
     return ERR_NONE;
 }
@@ -85,7 +89,7 @@ int timer_bus_listener(gbtimer_t* timer, addr_t addr)
         M_REQUIRE_NO_ERR(timer_state(timer, &old_state));
         if (addr == REG_DIV){
             timer -> counter = 0;
-            M_REQUIRE_NO_ERR(bus_write(*(timer -> cpu -> bus), REG_DIV, 0));
+            WRITE_REG(DIV,0);
         }
         M_REQUIRE_NO_ERR(timer_incr_if_state_change(timer, old_state));
     }

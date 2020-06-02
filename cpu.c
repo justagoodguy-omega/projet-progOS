@@ -13,6 +13,7 @@
 #include "cpu-storage.h"
 #include "util.h"
 #include "bus.h"
+#include "alu.h"
 
 #include <inttypes.h> // PRIX8
 #include <stdio.h> // fprintf
@@ -77,7 +78,9 @@ int cpu_plug(cpu_t* cpu, bus_t* bus)
 void cpu_free(cpu_t* cpu)
 {
     if (cpu != NULL){
-        bus_unplug(*(cpu -> bus), &(cpu -> high_ram));
+        if (cpu -> bus != NULL){
+            bus_unplug(*(cpu -> bus), &(cpu -> high_ram));
+        }
         component_free(&(cpu -> high_ram));
 
         cpu -> bus = NULL; 
@@ -382,7 +385,7 @@ static int cpu_do_cycle(cpu_t* cpu)
     }
     else {
         opcode_t next_op = cpu_read_at_idx(cpu, cpu -> PC);
-        if (next_op == 0xCB){
+        if (next_op == PREFIXED){ // ### CORR: use of macro
             instruction_t next_instruction = instruction_prefixed[cpu_read_data_after_opcode(cpu)];
             M_REQUIRE_NO_ERR(cpu_dispatch(&next_instruction, cpu));
         } else {

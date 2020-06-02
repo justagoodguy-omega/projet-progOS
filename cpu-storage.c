@@ -171,6 +171,8 @@ int cpu_dispatch_storage(const instruction_t* lu, cpu_t* cpu)
         reg_kind r = extract_reg(lu -> opcode, 3);
         if (s != r){
             cpu_reg_set(cpu, r, cpu_reg_get(cpu, s));
+        } else {
+            return ERR_INSTR; // ### CORR: error if r == s
         }
     } break;
 

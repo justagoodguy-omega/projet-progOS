@@ -47,12 +47,10 @@ int cartridge_init(cartridge_t* ct, const char* filename)
     if (filename == NULL || strlen(filename) == 0){
         return ERR_BAD_PARAMETER;
     }
-    component_t c;
-    memset(&c, 0, sizeof(component_t));
-    M_REQUIRE_NON_NULL(&c);
-    M_REQUIRE_NO_ERR(component_create(&c, BANK_ROM_SIZE));
-    M_REQUIRE_NO_ERR(cartridge_init_from_file(&c, filename));
-    ct -> c = c;
+    memset(&(ct -> c), 0, sizeof(component_t));
+    M_REQUIRE_NON_NULL(&(ct -> c));
+    M_REQUIRE_NO_ERR(component_create(&(ct -> c), BANK_ROM_SIZE));
+    M_REQUIRE_NO_ERR(cartridge_init_from_file(&(ct -> c), filename));
     return ERR_NONE;
 }
 

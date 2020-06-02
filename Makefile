@@ -23,7 +23,9 @@ CFLAGS += -std=c11 -Wall -pedantic -g -D_DEFAULT_SOURCE
 # all those libs are required on Debian, feel free to adapt it to your box
 LDLIBS += -lcheck -lm -lrt -pthread -lsubunit
 
-all:: test-cpu-week09 unit-test-cpu-dispatch-week09
+all:: unit-test-bit unit-test-alu unit-test-bus unit-test-memory unit-test-component \
+ unit-test-cpu unit-test-cpu-dispatch-week08 unit-test-cpu-dispatch-week09 \
+ unit-test-cartridge unit-test-timer
 
 test-cpu-week08 	: test-cpu-week08.o bit.o cpu.o alu.o bus.o memory.o component.o cpu-storage.o opcode.o cpu-registers.o cpu-alu.o error.o
 test-cpu-week09 	: test-cpu-week09.o bit.o cpu.o alu.o bus.o memory.o component.o cpu-storage.o opcode.o cpu-registers.o cpu-alu.o error.o
@@ -32,7 +34,8 @@ unit-test-alu 		: unit-test-alu.o alu.o bit.o
 unit-test-bus 		:	unit-test-bus.o bus.o component.o bit.o memory.o
 unit-test-memory 	: unit-test-memory.o memory.o bus.o component.o bit.o
 unit-test-component : unit-test-component.o component.o bus.o memory.o bit.o
-unit-test-cpu		: unit-test-cpu.o component.o bus.o memory.o bit.o cpu.o cpu-registers.o cpu-storage.o
+unit-test-cpu		: unit-test-cpu.o component.o bus.o memory.o bit.o cpu.o \
+ cpu-registers.o cpu-storage.o cpu-alu.o alu.o opcode.o
 unit-test-cpu-dispatch-week08 : unit-test-cpu-dispatch-week08.o alu.o \
  bit.o bus.o memory.o component.o opcode.o cpu-alu.o cpu-storage.o \
  cpu-registers.o gameboy.o timer.o cartridge.o bootrom.o
@@ -62,7 +65,7 @@ component.o: component.c component.h memory.h error.h
 cpu-alu.o: cpu-alu.c error.h bit.h alu.h cpu-alu.h opcode.h cpu.h bus.h \
  memory.h component.h cpu-storage.h cpu-registers.h
 cpu.o: cpu.c error.h opcode.h bit.h cpu.h alu.h bus.h memory.h \
- component.h cpu-alu.h cpu-registers.h cpu-storage.h util.h
+ component.h cpu-alu.h cpu-registers.h cpu-storage.h util.h alu.h opcode.h
 cpu-registers.o: cpu-registers.c cpu-registers.h cpu.h alu.h bit.h bus.h \
  memory.h component.h error.h
 cpu-storage.o: cpu-storage.c error.h cpu-storage.h memory.h opcode.h \
@@ -125,8 +128,10 @@ unit-test-timer.o: unit-test-timer.c util.h tests.h error.h timer.h \
 
 
 
-TARGETS := test-cpu-week09
-CHECK_TARGETS := unit-test-cpu-dispatch-week09
+TARGETS :=
+CHECK_TARGETS := unit-test-bit unit-test-alu unit-test-bus unit-test-memory unit-test-component \
+ unit-test-cpu unit-test-cpu-dispatch-week08 unit-test-cpu-dispatch-week09 \
+ unit-test-timer unit-test-cartridge
 OBJS = 
 OBJS_NO_STATIC_TESTS =
 OBJS_STATIC_TESTS = 
