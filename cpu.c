@@ -41,6 +41,10 @@ int cpu_init(cpu_t* cpu)
     cpu -> bus = NULL;
     cpu -> idle_time = 0;
     cpu -> write_listener = 0;
+    cpu -> IF = 0;
+    cpu -> IE = 0;
+    cpu -> IME = 0;
+    cpu -> HALT = 0;
 
     M_REQUIRE_NO_ERR(component_create(&(cpu -> high_ram), HIGH_RAM_SIZE));
    
@@ -80,8 +84,14 @@ void cpu_free(cpu_t* cpu)
     if (cpu != NULL){
         if (cpu -> bus != NULL){
             bus_unplug(*(cpu -> bus), &(cpu -> high_ram));
+            (*(cpu -> bus))[REG_IF] = NULL;
+            (*(cpu -> bus))[REG_IE] = NULL;
         }
         component_free(&(cpu -> high_ram));
+
+        cpu -> IF = 0;
+        cpu -> IE = 0;
+        
 
         cpu -> bus = NULL; 
     }
@@ -152,9 +162,10 @@ int handle_interruption(cpu_t* cpu){
     cpu -> IF = cpu -> IF & mask;
     cpu_SP_push(cpu, cpu -> PC);
 
+    int handle_interruption_cycles = 5;
     addr_t handlerAddr = 0x40 + 8*interruptIdx;
     cpu -> PC = handlerAddr;
-    cpu -> idle_time += 5;
+    cpu -> idle_time += handle_interruption_cycles;
 
     return ERR_NONE;
 }
@@ -175,6 +186,12 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
 
     cpu -> alu.value = 0;
     cpu -> alu.flags = 0;
+
+    uint16_t addr_after_opcode =  cpu_read_addr_after_opcode(cpu);
+    int8_t data_after_opcode = (int8_t)cpu_read_data_after_opcode(cpu);
+    cpu -> idle_time = lu -> cycles - 1;
+    cpu -> PC = cpu -> PC + lu -> bytes;
+    
 
     switch (lu->family) {
 
@@ -226,6 +243,7 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
     case LD_HLSP_S8:
     case DAA:
     case SCCF:
+        cpu -> PC = cpu -> PC - lu -> bytes;
         M_EXIT_IF_ERR(cpu_dispatch_alu(lu, cpu));
         break;
 
@@ -252,6 +270,7 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
     case LD_SP_HL:
     case POP_R16:
     case PUSH_R16:
+        cpu -> PC = cpu -> PC - lu -> bytes;
         M_EXIT_IF_ERR(cpu_dispatch_storage(lu, cpu));
         break;
 
@@ -259,77 +278,61 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
      // JUMP
     case JP_CC_N16:
         if(checkCCconditions(cpu, lu -> opcode)){
-            cpu -> PC = cpu_read_addr_after_opcode(cpu);
-            cpu -> idle_time = lu -> cycles + lu -> xtra_cycles;
-            return ERR_NONE;
+            cpu -> PC = addr_after_opcode;
+            cpu -> idle_time += lu -> xtra_cycles;
         }
         break;
 
     case JP_HL:
         cpu -> PC = cpu -> HL;
-        cpu -> idle_time = lu -> cycles;
-        return ERR_NONE;
         break;
 
     case JP_N16:
-        cpu -> PC = cpu_read_addr_after_opcode(cpu);
-        cpu -> idle_time = lu -> cycles;
-        return ERR_NONE;
+        cpu -> PC = addr_after_opcode;
         break;
 
     case JR_CC_E8:
         if(checkCCconditions(cpu, lu -> opcode)){
-            cpu -> PC = (cpu -> PC) + lu -> bytes + (int8_t)cpu_read_data_after_opcode(cpu);
-            cpu -> idle_time = lu -> cycles + lu -> xtra_cycles;
-            return ERR_NONE;
+            cpu -> PC = (cpu -> PC) + data_after_opcode;
+            cpu -> idle_time += lu -> xtra_cycles;
         }
         break;
 
     case JR_E8:
-        cpu -> PC = (cpu -> PC) + lu -> bytes + (int8_t)cpu_read_data_after_opcode(cpu);
-        cpu -> idle_time = lu -> cycles;
-        return ERR_NONE;
+        cpu -> PC = (cpu -> PC) + data_after_opcode;
         break;
 
 
     // CALLS
     case CALL_CC_N16:
         if(checkCCconditions(cpu, lu -> opcode)){
-            cpu_SP_push(cpu, cpu -> PC + lu -> bytes);
-            cpu -> PC = cpu_read_addr_after_opcode(cpu);
-            cpu -> idle_time = lu -> cycles + lu -> xtra_cycles;
-            return ERR_NONE;
+            M_REQUIRE_NO_ERR(cpu_SP_push(cpu, cpu -> PC));
+            cpu -> PC = addr_after_opcode;
+            cpu -> idle_time += lu -> xtra_cycles;
         }
         break;
 
     case CALL_N16:
-        cpu_SP_push(cpu, cpu -> PC + lu -> bytes);
-        cpu -> PC = cpu_read_addr_after_opcode(cpu);
-        cpu -> idle_time = lu -> cycles;
-        return ERR_NONE;
+        cpu_SP_push(cpu, cpu -> PC);
+        cpu -> PC = addr_after_opcode;
         break;
 
 
     // RETURN (from call)
     case RET:
         cpu -> PC = cpu_SP_pop(cpu);
-        cpu -> idle_time = lu -> cycles;
-        return ERR_NONE;
         break;
 
     case RET_CC:
         if(checkCCconditions(cpu, lu -> opcode)){
             cpu -> PC = cpu_SP_pop(cpu);
-            cpu -> idle_time = lu -> cycles + lu -> xtra_cycles;
-            return ERR_NONE;
+            cpu -> idle_time += lu -> xtra_cycles;
         }
         break;
 
     case RST_U3:
-        cpu_SP_push(cpu, cpu -> PC + lu -> bytes);
+        M_REQUIRE_NO_ERR(cpu_SP_push(cpu, cpu -> PC));
         cpu -> PC = extract_n3(lu -> opcode) << 3;
-        cpu -> idle_time = lu -> cycles;
-        return ERR_NONE;
         break;
 
 
@@ -349,8 +352,6 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
     case RETI:
         cpu -> IME = 1;
         cpu -> PC = cpu_SP_pop(cpu);
-        cpu -> idle_time = lu -> cycles;
-        return ERR_NONE;
         break;
 
     case HALT:
@@ -369,8 +370,6 @@ static int cpu_dispatch(const instruction_t* lu, cpu_t* cpu)
 
     } // switch
 
-    cpu -> idle_time = cpu -> idle_time + lu -> cycles;
-    cpu -> PC = cpu -> PC + lu -> bytes;
 
     return ERR_NONE;
 }

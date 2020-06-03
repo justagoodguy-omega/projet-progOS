@@ -141,7 +141,7 @@ int gameboy_run_until(gameboy_t* gameboy, uint64_t cycle)
         for(; gameboy -> cycles < cycle; ++(gameboy -> cycles)){
             // ### CORR: listeners in loop
             M_REQUIRE_NO_ERR(bootrom_bus_listener(gameboy, gameboy -> cpu.PC));
-            M_REQUIRE_NO_ERR(timer_bus_listener(&(gameboy -> timer), gameboy -> cpu.PC));
+            M_REQUIRE_NO_ERR(timer_bus_listener(&(gameboy -> timer), gameboy -> cpu.write_listener));
             M_REQUIRE_NO_ERR(cpu_cycle(&(gameboy -> cpu)));
         }
     } else {
