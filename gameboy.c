@@ -79,11 +79,11 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
     gameboy -> boot = 1;
 
     // SCREEN
-    // ### for test week 9 M_REQUIRE_NO_ERR(lcdc_init(gameboy));
-    // ### for test week 9 M_REQUIRE_NO_ERR(lcdc_plug(&(gameboy -> screen), gameboy -> bus));
+    M_REQUIRE_NO_ERR(lcdc_init(gameboy));
+    M_REQUIRE_NO_ERR(lcdc_plug(&(gameboy -> screen), gameboy -> bus));
 
     // JOYPAD
-    // ### for test week 9 M_REQUIRE_NO_ERR(joypad_init_and_plug(&(gameboy -> pad), &(gameboy -> cpu)));
+    M_REQUIRE_NO_ERR(joypad_init_and_plug(&(gameboy -> pad), &(gameboy -> cpu)));
 
     return ERR_NONE;
 }
@@ -120,7 +120,7 @@ void gameboy_free(gameboy_t* gameboy)
             cartridge_free(&gameboy -> cartridge);
         }
         //free screen
-        // ### for test week 9 lcdc_free(&(gameboy -> screen));
+        lcdc_free(&(gameboy -> screen));
         // lcdc unplug ??
 
         //free pad??
