@@ -78,13 +78,14 @@ int gameboy_create(gameboy_t* gameboy, const char* filename)
     M_REQUIRE_NO_ERR(bootrom_plug(&(gameboy -> bootrom), gameboy -> bus));
     gameboy -> boot = 1;
 
+    /* ### REMOVED BECAUSE COULD'T CORRECTLY USE LIBRARY
     // SCREEN
     M_REQUIRE_NO_ERR(lcdc_init(gameboy));
     M_REQUIRE_NO_ERR(lcdc_plug(&(gameboy -> screen), gameboy -> bus));
 
     // JOYPAD
     M_REQUIRE_NO_ERR(joypad_init_and_plug(&(gameboy -> pad), &(gameboy -> cpu)));
-
+    */
     return ERR_NONE;
 }
 
@@ -119,12 +120,10 @@ void gameboy_free(gameboy_t* gameboy)
             bus_unplug(gameboy -> bus, &(gameboy -> cartridge.c));
             cartridge_free(&gameboy -> cartridge);
         }
+        /* ### REMOVED BECAUSE COULD'T CORRECTLY USE LIBRARY
         //free screen
         lcdc_free(&(gameboy -> screen));
-        // lcdc unplug ??
-
-        //free pad??
-
+        */
         gameboy = NULL;
     }
 }
